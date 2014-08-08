@@ -1,0 +1,121 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% if craft.oauth.getProviders is defined %}
+    {% set providers = craft.placid.getProviders %}
+{% endif %}
+
+{% set accessTokens = craft.placid.selectTokens %}
+
+{% if requestId is not defined %} {% set requestId = null %}{% endif %}
+{% if request is not defined %}
+  {% if requestId %}
+    {% set request = craft.placid.request(requestId) %}
+    {% if not request %}{% exit 404 %}{% endif %}
+  {% else %}
+    {% set request = null %}
+  {% endif %}
+{% endif %}
+
+{% set title = request ? request.name : "New Request"|t %}
+
+{% if request.params is defined %}
+    {% set params = request.params %}
+{% else %}
+    {% set params = null %}
+{% endif %}
+{% set crumbs = [
+    { label: "Placid"|t, url: url('placid') },
+    { label: request ? request.name : 'New request', url: url( request ? '/edit/request/' ~ request.id : 'add') }
+] %}
+{% set content %}
+  <form method="post" action="" accept-charset="UTF-8" data-saveshortcut="1" data-saveshortcut-redirect="/admin/placid/edit/request/{{ requestId }}">
+    <input type="hidden" name="action" value="placid/requests/saveRequest">
+    <input type="hidden" name="redirect" value="placid" />
+    <input type="hidden" name="requestId" value="{{ requestId }}" />
+  {{ forms.textField({
+            label: 'Name'|t,
+            id : 'name',
+            required: true,
+            name: 'requestName',
+            value: request ? request.name : null,
+            errors: request ? request.errors('name') : null
+        }) }}
+
+ {{ forms.textField({
+            label: "Handle"|t,
+            instructions: "How you’ll refer to this request in the templates."|t,
+            id: 'handle',
+            class: 'code',
+            name: 'handle',
+            value: request ? request.handle : null,
+            errors: request ? request.errors('handle') : null,
+            required: true
+        }) }}
+
+        {{ forms.textField({
+            label: 'URL'|t,
+            required: true,
+            name: 'requestUrl',
+            value: request ? request.url : null,
+            errors: request ? request.errors('url') : null
+        }) }}
+{% if providers is defined %}
+
+
+            {{ forms.selectField({
+            label: "Authentication" | t,
+            name: 'oauth',
+            instructions: 'Select with OAUTH provider to use for authentication.',
+            options: providers,
+            value : request ? request.oauth : null,
+            }) }}
+
+{% endif %}
+
+
+{% if accessTokens is defined %}
+
+    {{ forms.selectField({
+            label: "Basic Authentication" | t,
+            name: 'tokenId',
+            instructions: 'Select which access token to add to requests',
+            options: accessTokens,
+            value : request ? request.tokenId : null,
+            }) }}
+
+{% endif %}
+
+
+        {{ forms.editableTableField({
+            label: 'Params',
+            instructions : 'Define your url parameters below.',
+            id: 'params',
+            rows: 4,
+            textual: false,
+            name: 'params',
+            addRowLabel : 'Add param',
+            cols : {
+                'key' : {
+                    'heading' : 'Key',
+                    'type'   : 'singleline'
+                },
+                'value' : {
+                    'heading' : 'Value',
+                    'type'   : 'singleline'
+                }
+            },
+            rows : params
+        }) }}
+
+
+<div class="buttons">
+  <input type="submit" class="btn submit" value="{{ 'Save'|t }}">
+</div>
+</form>
+{% endset %}
+
+{% set js %}
+    new Craft.HandleGenerator('#name', '#handle');
+{% endset %}
+{% includeJs js %}

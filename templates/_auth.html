@@ -1,0 +1,48 @@
+{% extends "placid/_layout" %}
+
+{% set selectedTab = 'auth' %}
+
+{% set content %}
+{% set settingsUrl = url('oauth/twitter') %}
+
+{% set oauth = craft.plugins.getPlugin('oauth', false) %}
+
+<div class="buttons">
+      <a href="{{ url('placid/addToken')}}" class="btn submit add icon">Add access token</a>
+    </div>
+
+{% set tokens = craft.placid.getaccessTokens %}
+
+<table id="fields" class="data fullwidth collapsible">
+  <thead>
+      <tr>
+          <th scope="col">{{ "Name"|t }}</th>
+          <th scope="col">{{ "Access token"|t }}</th>
+          <th></th>
+      </tr>
+  </thead>
+  <tbody>
+      {% for token in tokens %}
+        <tr data-id="{{ token.id }}" data-name="{{ token.name }}">
+          <td><a href="{{ url("placid/edit/token/" ~ token.id) }}">{{ token.name }}</a></td>
+          <td>
+            {% if user.admin %}
+              {{ token.encoded_token }}
+            {% else %}
+              <small>Only admins can see access tokens</small>
+            {% endif %}
+          </td>
+         <td><a class="delete icon" title="{{ 'Delete'|t }}"></a></td> 
+      </tr>
+      {% endfor %}
+    </tbody>
+    </table>
+{% endset %}
+{% set js %}
+    new Craft.AdminTable({
+        tableSelector: '#fields',
+        noObjectsSelector: '#nofields',
+        deleteAction: 'placid/token/deleteToken'
+    });
+{% endset %}
+{% includeJs js %}

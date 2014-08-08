@@ -1,0 +1,14 @@
+{% extends "_layouts/cp" %}
+
+{% import "_includes/forms" as forms %}
+
+{% set title = "Placid"|t %}
+
+
+{% set tabs = {
+    requests: { label: "Requests"|t, url: url('placid') },
+    auth: { label: "Basic Auth"|t, url: url('placid/auth') },
+    oauth: { label: "OAuth"|t, url: url('placid/oauth') }
+} %}
+
+

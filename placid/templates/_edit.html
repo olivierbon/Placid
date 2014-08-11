@@ -1,6 +1,7 @@
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 
+
 {% if craft.oauth.getProviders is defined %}
     {% set providers = craft.placid.getProviders %}
 {% endif %}
@@ -56,6 +57,7 @@
         {{ forms.textField({
             label: 'URL'|t,
             required: true,
+            id: 'query',
             name: 'requestUrl',
             value: request ? request.url : null,
             errors: request ? request.errors('url') : null
@@ -117,5 +119,15 @@
 
 {% set js %}
     new Craft.HandleGenerator('#name', '#handle');
+
+    var options, a;
+    jQuery(function(){
+        options = { serviceUrl:'http://apps.alecritson.co.uk/placid/suggestions' };
+        a = $('#query').autocomplete(options);
+    }); 
 {% endset %}
+{% includeCssResource "placid/css/placid.css" %}
+
+{% includeJsResource "placid/js/placid_autocomplete.js" %}
+
 {% includeJs js %}

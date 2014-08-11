@@ -192,7 +192,7 @@ class Placid_RequestsService extends BaseApplicationComponent
      * @return boolean
      */
 
-    private function _authenticate($auth, $client)
+    private function _authenticateOauth($auth, $client)
     {
 
         $provider = craft()->oauth->getProvider($auth);
@@ -238,7 +238,7 @@ class Placid_RequestsService extends BaseApplicationComponent
             $client = new Client($url);
 
             // Check whether there is an oauth attribute and if so, authenticate the request
-            $requestRecord->getAttribute('oauth') ? $this->_authenticate($requestRecord->getAttribute('oauth'), $client) : '';
+            $requestRecord->getAttribute('oauth') ? $this->_authenticateOauth($requestRecord->getAttribute('oauth'), $client) : '';
            
             $params = $this->_buildParams($requestRecord, $options);
 
@@ -251,6 +251,8 @@ class Placid_RequestsService extends BaseApplicationComponent
                 $url .= '?' . $params;
             }
             $accesstoken = $requestRecord->getAttribute('tokenId');
+
+            
             if($accesstoken) {
               // If there are no current params, we will need to start with a ?
               $params ? $url .= '&' : $url .= '?';

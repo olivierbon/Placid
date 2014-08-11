@@ -15,7 +15,7 @@
                 <th scope="col">{{ "Handle"|t }}</th>
                 <th scope="col">{{ "URL"|t }}</th>
                 <th scope="col">{{ "OAuth"|t }}</th>
-                <th scope="col">{{ "Auth"|t }}</th>
+                <th scope="col">{{ "Basic Auth"|t }}</th>
                 <th scope="col">{{ "Delete"|t }}</th>
             </tr>
         </thead>
@@ -44,5 +44,6 @@
         noObjectsSelector: '#nofields',
         deleteAction: 'placid/requests/deleteRequest'
     });
+
 {% endset %}
 {% includeJs js %}

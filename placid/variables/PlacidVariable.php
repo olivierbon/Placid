@@ -26,8 +26,8 @@ class PlacidVariable
     {
         return craft()->placid_requests->getAllRequests();
     }
-    public function token($id) {
-        return craft()->placid_token->findTokenById($id);
+    public function token($provider) {
+        return craft()->placid_requests->getToken($provider);
     }
     public function request($id)
     {

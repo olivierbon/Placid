@@ -280,9 +280,9 @@ class Placid_RequestsService extends BaseApplicationComponent
             $response = $response->json();
 
             // If cache is enabled save a new cache
-            $cache = array_key_exists('cache', $options) ? $options['cache'] : true;
+            $cache = array_key_exists('cache', $options) ? $options['cache'] : $this->placid_settings['cache'];
 
-            if( $this->placid_settings['cache'] && $cache ) {
+            if( $cache ) {
                 craft()->placid_cache->set($requestRecord, $response);
             }
 

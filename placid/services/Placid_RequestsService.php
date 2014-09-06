@@ -9,6 +9,7 @@ class Placid_RequestsService extends BaseApplicationComponent
 {
 
     protected $requestRecord;
+    protected $placid_settings;
     private $token;
 
     public function __construct($requestRecord = null)
@@ -17,6 +18,9 @@ class Placid_RequestsService extends BaseApplicationComponent
         if(is_null($this->requestRecord)) {
             $this->requestRecord = Placid_RequestsRecord::model();
         }
+
+        $plugin = craft()->plugins->getPlugin('placid');
+        $this->placid_settings = $plugin->getSettings();
     }
 
     /**
@@ -175,8 +179,21 @@ class Placid_RequestsService extends BaseApplicationComponent
                 )
              );
 
+
         if($requestRecord) {
-            return $this->_get($requestRecord, $options);
+            
+            $cachedRequest = craft()->placid_cache->get($requestRecord['cache_id']);
+
+            $c = array_key_exists('cache', $options) ? $options['cache'] : true;
+
+            // If cache_id is null or craft cache returns false, continue with live pull
+            if( ! $c || ! $requestRecord['cache_id'] || ! $cachedRequest ) {
+
+                return $this->_get($requestRecord, $options);
+            }
+
+           return $cachedRequest;
+    
         } else {
             throw new Exception(Craft::t('Can\'t find request with handle "{handle}"', array('handle' => $handle)));
         }
@@ -261,6 +278,13 @@ class Placid_RequestsService extends BaseApplicationComponent
 
             $response = $client->get($url, $headers, $postFields)->send();
             $response = $response->json();
+
+            // If cache is enabled save a new cache
+            $cache = array_key_exists('cache', $options) ? $options['cache'] : true;
+
+            if( $this->placid_settings['cache'] && $cache ) {
+                craft()->placid_cache->set($requestRecord, $response);
+            }
 
             return $response;
     }

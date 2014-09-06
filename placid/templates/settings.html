@@ -1,0 +1,10 @@
+{% import "_includes/forms" as forms %}
+
+	{{ forms.checkboxField({
+        label: "Cache requests"|t,
+        instructions: "This will enable caching for all requests"|t,
+        id: 'handle',
+        class: 'cache',
+        name: 'cache',
+        checked: settings.cache
+    }) }}

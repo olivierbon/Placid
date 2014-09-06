@@ -17,6 +17,7 @@ class Placid_RequestsModel extends BaseModel
             'oauth' => AttributeType::String,
             'tokenId' => AttributeType::Number,
             'params' => AttributeType::String,
+            'cache_id' => AttributeType::Mixed
         );
     }
 }

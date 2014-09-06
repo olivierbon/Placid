@@ -10,7 +10,7 @@ class PlacidPlugin extends BasePlugin
   }
   function getVersion()
   {
-    return '0.9.8';
+    return '1.0';
   }
   function getDeveloper()
   {
@@ -35,12 +35,12 @@ class PlacidPlugin extends BasePlugin
             'placid/auth' => 'placid/_auth',
        );
   }
-  // function registerCachePaths()
-  // {
-  //     return array(
-  //         craft()->path->getStoragePath().'placid_requests/' => Craft::t('Placid requests'),
-  //     );
-  // }
+  function registerCachePaths()
+  {
+      return array(
+          craft()->path->getStoragePath().'placid_requests/' => Craft::t('Placid requests'),
+      );
+  }
   /**
    * Defines the settings.
    *
@@ -53,9 +53,16 @@ class PlacidPlugin extends BasePlugin
           'twitter' => array(AttributeType::Number),
           'github' => array(AttributeType::Number),
           'instagram' => array(AttributeType::Number),
+          'cache' => array(AttributeType::Bool, 'default' => true),
       );
   }
 
+  public function getSettingsHtml()
+    {
+       return craft()->templates->render('placid/settings', array(
+           'settings' => $this->getSettings()
+       ));
+   }
 
 /**
  * Remove all tokens related to this plugin when uninstalled

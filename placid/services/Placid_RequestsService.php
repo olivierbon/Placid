@@ -15,19 +15,31 @@ class Placid_RequestsService extends BaseApplicationComponent
     public function __construct($requestRecord = null)
     {
         $this->requestRecord = $requestRecord;
-        if(is_null($this->requestRecord)) {
+
+        if(is_null($this->requestRecord))
+        {
             $this->requestRecord = Placid_RequestsRecord::model();
         }
 
+        // Get the plugin
         $plugin = craft()->plugins->getPlugin('placid');
+
+        // Get the plugin settings
         $this->placid_settings = $plugin->getSettings();
     }
 
     /**
-     * Get OAuth Token
-     */
+    * Get the token from a provider
+    *                                   
+    * @param string|null      $provider     The handle of the provider
+    *
+    * @return string   the token if the method was successful. 
+    *                  A null value will be returned if no token exists
+    */
+
     public function getToken($provider = null)
     {
+
         if($this->token)
         {
             return $this->token;
@@ -52,10 +64,21 @@ class Placid_RequestsService extends BaseApplicationComponent
                 $this->token = $token;
                 return $this->token;
             }
+
+            return null;
         }
     }
 
-     /** * Save OAuth Token */
+     /**
+     * Save the token
+     *                                   
+     * @param string          $token  The token which needs to be saved
+     *
+     * @param string|null     $provider The provider handle    
+     *
+     * @return boolean        true if token is saved
+     *          
+     */
 
      public function saveToken($token, $provider = null) {
        // get plugin
@@ -70,14 +93,11 @@ class Placid_RequestsService extends BaseApplicationComponent
       // get token
       $model = craft()->oauth->getTokenById($tokenId);
 
-
       // populate token model
-
       if(!$model)
       {
           $model = new Oauth_TokenModel;
       }
-
 
       $model->providerHandle = $provider;
       $model->pluginHandle = 'placid';
@@ -86,43 +106,103 @@ class Placid_RequestsService extends BaseApplicationComponent
       // save token
       craft()->oauth->saveToken($model);
 
+
+      // If its an instagram token, save that into the tokens bit on placid
+      // -----------------------------------------------------------------------------
+
+      if($model->providerHandle == 'instagram' && $model->encodedToken != '') {
+
+        // Get the decoded token from the OAuth plugin
+        $tokenModel = craft()->oauth->decodeToken($model->encodedToken);
+
+        // Encrypt the token the Placid way
+        $token = craft()->security->hashData($tokenModel->getAccessToken());
+
+        // Set the attributes for the model
+        $atts = array(
+          'name' => ucfirst($model->providerHandle),
+          'encoded_token' => $token,
+          'token_handle' => $model->providerHandle,
+        );
+
+        // Set the new token model with the attributes
+        $placidTokenModel = craft()->placid_token->newToken($atts);
+
+        // Save the token in the access tokens part
+        craft()->placid_token->saveToken($placidTokenModel);
+
+      }
+
       // set token ID
       $settings[$provider] = $model->id;
 
       // save plugin settings
       craft()->plugins->savePluginSettings($plugin, $settings);
+
+      return true;
     }
+
+    /**
+    * Create a new model object of a request
+    *                                   
+    * @param array     $attributes  The attributes to save against the model 
+    *
+    * @return model    returns Placid_RequestsModel object
+    *          
+    */
 
     public function newRequest($attributes = array())
     {
-        $model = new Placid_RequestsModel();
-        $model->setAttributes($attributes);
-        return $model;
+
+      // Create the new Placid_RequestsModel
+      // -----------------------------------------------------------------------------
+      $model = new Placid_RequestsModel();
+
+      // Set the attributes from the array
+      $model->setAttributes($attributes);
+
+      // Return the Placid_RequestsModel model
+      return $model;
     }
 
      /**
      * Save a request
      *
      * @param object RequestsModel object
+     *
      * @return bool true or false if request has been saved
      */
 
     public function saveRequest(Placid_RequestsModel &$model)
     {
-        // Find a request model, if none exists it must be a new record
-        if($id = $model->getAttribute('id')) {
+        // Determine whether this is an existing request or if we need to create a new one
+        // --------------------------------------------------------------------------------
+
+        if($id = $model->getAttribute('id')) 
+        {
             $record = $this->requestRecord->findByPk($id);
-        } else {
+        } 
+        else 
+        {
             $record = $this->requestRecord->create();
         }
-        // Get attributes from model, if any
+
+        // Get the attributes from the passed model
         $attributes = $model->getAttributes();
-        // Fix this, only saves as unsafe value
+
+        // Set the new attributes to the record
         $record->setAttributes($attributes, false);
-        if($record->save()) {
+
+        // Save the new request
+        // -----------------------------------------------------------------------------
+
+        if($record->save())
+        {
             $model->setAttribute('id', $record->getAttribute('id'));
             return true;
-        } else {
+        } 
+        else 
+        {
             $model->addErrors($record->getErrors());
             return false;
         }
@@ -136,67 +216,86 @@ class Placid_RequestsService extends BaseApplicationComponent
 
     public function getAllRequests()
     {
-        $records = $this->requestRecord->findAll(array('order' => 't.id'));
-        return Placid_RequestsModel::populateModels($records, 'id');
+      // Find all the requests and order them by ID
+      // -----------------------------------------------------------------------------
+      $args = array('order' => 't.id');
+      $records = $this->requestRecord->findAll($args);
+      return Placid_RequestsModel::populateModels($records, 'id');
     }
 
-     /**
-     * Find request by ID
-     *
-     * @param string $id 
-     * @return request model object 
-     */
+    /**
+    * Find request by ID
+    *
+    * @param string $id 
+    *
+    * @return request model object
+    */
     public function findRequestById($id)
     {
-     if( $record = $this->requestRecord->findByPk($id)) {
 
-        $params = $record->getAttribute('params');
+     // Determine if there is a request record and return it
+     // -----------------------------------------------------------------------------
 
-        $decodedParams = unserialize(base64_decode($params));
-        $record->setAttribute('params', $decodedParams);
-        return Placid_RequestsModel::populateModel($record);
+     if($record = $this->requestRecord->findByPk($id))
+     {
+       $params = $record->getAttribute('params');
+       $decodedParams = unserialize(base64_decode($params));
+       $record->setAttribute('params', $decodedParams);
+       return Placid_RequestsModel::populateModel($record);
      }
     }
 
     /**
-     * Return the request
-     *
-     * @param string $handle
-     * @param array $options
-     * @return mixed
-     */
+    * Return the request
+    *
+    * @param string $handle
+    *
+    * @param array $options
+    *
+    * @throws Exception
+    *
+    * @return mixed
+    */
 
     public function findRequestByHandle($handle, $options)
     {
+      Craft::log(__METHOD__, LogLevel::Info, true);
 
-         Craft::log(__METHOD__, LogLevel::Info, true);
-            $requestRecord =  $this->requestRecord->find(
-                // conditions
-                'handle=:handle',
-                // params
-                array(
-                    ':handle' => $handle
-                )
-             );
+      // Get the request record by its handle
+      // ---------------------------------------------
 
+      $requestRecord =  $this->requestRecord->find(
+        'handle=:handle',
+        array(
+          ':handle' => $handle
+        )
+      );
 
-        if($requestRecord) {
-            
-            $cachedRequest = craft()->placid_cache->get($requestRecord['cache_id']);
+      // Determine if there is a requestRecord and act accordingly
+      // -----------------------------------------------------------------------------
 
-            $c = array_key_exists('cache', $options) ? $options['cache'] : true;
+      if($requestRecord)
+      {
 
-            // If cache_id is null or craft cache returns false, continue with live pull
-            if( ! $c || ! $requestRecord['cache_id'] || ! $cachedRequest ) {
+        // Get a cached request
+        $cachedRequest = craft()->placid_cache->get($requestRecord['cache_id']);
 
-                return $this->_get($requestRecord, $options);
-            }
+        // Do we need to try serve a cached version or not
+        $c = array_key_exists('cache', $options) ? $options['cache'] : true;
 
-           return $cachedRequest;
-    
-        } else {
-            throw new Exception(Craft::t('Can\'t find request with handle "{handle}"', array('handle' => $handle)));
+        // If cache_id is null or craft cache returns false, continue with live pull
+        if( ! $c || ! $requestRecord['cache_id'] || ! $cachedRequest )
+        {
+          return $this->_get($requestRecord, $options);
         }
+        
+        return $cachedRequest;
+
+      }
+      else
+      {
+        throw new Exception(Craft::t('Can\'t find request with handle "{handle}"', array('handle' => $handle)));
+      }
     }
 
 
@@ -223,6 +322,7 @@ class Placid_RequestsService extends BaseApplicationComponent
         {
             return null;
         }
+
         $oauth = new \Guzzle\Plugin\Oauth\OauthPlugin(array(
             'consumer_key'    => $provider->clientId,
             'consumer_secret' => $provider->clientSecret,
@@ -240,82 +340,119 @@ class Placid_RequestsService extends BaseApplicationComponent
      * the GET request
      *
      * @param  model $requestRecord
+     *
      * @param  array $options null
+     *
      * @param  string $method
+     *
      * @param  string $headers null
+     *
      * @param  array $postFields null
+     *
      * @return array $response
      */
 
     private function _get($requestRecord,$options = null, $method = 'get', $headers = null, $postFields = null)
     {
 
-            $url = $requestRecord->getAttribute('url');
+      // Get the url from the request record
+      $url = $requestRecord->getAttribute('url');
 
-            $client = new Client($url);
+      // Create a new Guzzle Client
+      $client = new Client($url);
 
-            // Check whether there is an oauth attribute and if so, authenticate the request
-            $requestRecord->getAttribute('oauth') ? $this->_authenticateOauth($requestRecord->getAttribute('oauth'), $client) : '';
-           
-            $params = $this->_buildParams($requestRecord, $options);
+      // Check whether there is an oauth attribute and if so, authenticate the request
+      $requestRecord->getAttribute('oauth') ? $this->_authenticateOauth($requestRecord->getAttribute('oauth'), $client) : '';
 
-            $segments = $this->_buildSegments($options);
+      // Get the params from the builder
+      $params = $this->_buildParams($requestRecord, $options);
 
-            if($segments) {
-                $url .= $segments;
-            }
-            if($params) {
-                $url .= '?' . $params;
-            }
-            $accesstoken = $requestRecord->getAttribute('tokenId');
+      // Get the segments from the builder
+      $segments = $this->_buildSegments($options);
 
-            
-            if($accesstoken) {
-              // If there are no current params, we will need to start with a ?
-              $params ? $url .= '&' : $url .= '?';
-              $url .= $this->_buildAccessTokenQuery($requestRecord, $accesstoken);
-            }
+      // If there are segments, add them to the url
+      if($segments)
+      {
+          $url .= $segments;
+      }
 
-            $response = $client->get($url, $headers, $postFields)->send();
-            $response = $response->json();
+      // If there are params, add them to the url
+      if($params)
+      {
+          $url .= '?' . $params;
+      }
 
-            // If cache is enabled save a new cache
-            $cache = array_key_exists('cache', $options) ? $options['cache'] : $this->placid_settings['cache'];
+      // Get the access token from the record
+      $accesstoken = $requestRecord->getAttribute('tokenId');
 
-            if( $cache ) {
-                craft()->placid_cache->set($requestRecord, $response);
-            }
+      // If there is an access token, we need to build it into the query
+      if($accesstoken)
+      {
+        // If there are no current params, we will need to start with a ?
+        $params ? $url .= '&' : $url .= '?';
+        $url .= $this->_buildAccessTokenQuery($requestRecord, $accesstoken);
+      }
 
-            return $response;
+      // Use Guzzle to GET the request assign the response to a variable
+      $response = $client->get($url, $headers, $postFields)->send();
+
+      // Update this variable with a JSON object
+      $response = $response->json();
+
+      // If cache is enabled save a new cache, first check if it is set in template, if not, load from settings
+      $cache = array_key_exists('cache', $options) ? $options['cache'] : $this->placid_settings['cache'];
+
+      if($cache)
+      {
+          craft()->placid_cache->set($requestRecord, $response);
+      }
+
+      return $response;
     }
 
     /**
-     * Builds the params to attach to url
-     *
-     * @param  model $requestRecord
-     * @param  array $options
-     * @return string
-     */
+    * Build the params for the url
+    *
+    * Determine how we are going to add the params (this needs improving)
+    * and then build the parameters to append to the url.
+    *
+    * @param  model $requestRecord
+    * @param  array $options
+    * @return string
+    */
 
     private function _buildParams($requestRecord, $options)
     {
-        $params = '';
-        $cpParams = unserialize(base64_decode($requestRecord->getAttribute('params')));
-            if(isset($options['params'])) {
-                $params = $options['params'];
-                if(is_array($params)) {
-                    $params = http_build_query($params, '', '&amp;');
-                } else {
-                    throw new Exception(Craft::t('Parameters argument is not an array'));
-                }
-            } elseif(is_array($cpParams)) {
-                $counter = 0;
-                foreach($cpParams as $key => $value) {
-                    $params .= ($counter++ >= 1 ? '&' : '') . $value['key'] . '=' . $value['value'];
-                }
-            } 
+      $params = '';
+      // Get any control panel parameters
+      $cpParams = unserialize(base64_decode($requestRecord->getAttribute('params')));
+      
+      // Are the parameters set in the template?
+      if(isset($options['params']))
+      {
+        $params = $options['params'];
+
+        // Determine whether the params are an array
+        if(is_array($params))
+        {
+          $params = http_build_query($params, '', '&amp;');
+        }
+        else
+        {
+          // If the params are not an array, we can't build it so we throw an exception
+          throw new Exception(Craft::t('Parameters argument is not an array'));
+        }
+      }
+      else if(is_array($cpParams))
+      {
+        $counter = 0;
+        foreach($cpParams as $key => $value)
+        {
+          $params .= ($counter++ >= 1 ? '&' : '').$value['key'].'='.$value['value'];
+        }
+      } 
             
-        return $params;
+      return $params;
     }
 
     /**
@@ -343,7 +480,8 @@ class Placid_RequestsService extends BaseApplicationComponent
 
     private function _buildSegments($options)
     {
-      if(isset($options['segments'])) {
+      if(isset($options['segments']))
+      {
           $segments = $options['segments'];
           return $segments;
       }

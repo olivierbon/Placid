@@ -81,7 +81,7 @@ class Placid_RequestsController extends BaseController
                 craft()->placid_requests->saveToken($token, $provider);
 
                 // session notice
-                craft()->userSession->setNotice(Craft::t("Connected to Twitter."));
+                craft()->userSession->setNotice(Craft::t("Connected"));
             }
             else
             {
@@ -101,7 +101,7 @@ class Placid_RequestsController extends BaseController
         craft()->placid_requests->saveToken(null, $provider);
 
         // set notice
-        craft()->userSession->setNotice(Craft::t("Disconnected from Twitter."));
+        craft()->userSession->setNotice(Craft::t("Disconnected"));
 
         // redirect
         $redirect = craft()->request->getUrlReferrer();

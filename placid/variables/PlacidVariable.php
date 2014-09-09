@@ -44,16 +44,8 @@ class PlacidVariable
     }
     public function getProviders()
     {
-        $providers = craft()->oauth->getProviders();
-
-        $values = [null => 'None'];
-
-        
-        foreach($providers as $key => $value) {
-            $values[$key] = $value['name'];
-        }
-
-
+        $twitter = craft()->oauth->getProvider('twitter');
+        $values = array(null => 'None', $twitter['handle'] => $twitter['name']);
         return $values;
     }
 }

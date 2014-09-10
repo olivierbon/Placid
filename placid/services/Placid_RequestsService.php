@@ -80,66 +80,67 @@ class Placid_RequestsService extends BaseApplicationComponent
      *          
      */
 
-     public function saveToken($token, $provider = null) {
-       // get plugin
-       $plugin = craft()->plugins->getPlugin('placid');
+     public function saveToken($token, $provider = null)
+     {
+        // get plugin
+        $plugin = craft()->plugins->getPlugin('placid');
   
-      // get settings
-      $settings = $plugin->getSettings();
+        // get settings
+        $settings = $plugin->getSettings();
+    
+        // get tokenId
+        $tokenId = $settings[$provider];
+    
+        // get token
+        $model = craft()->oauth->getTokenById($tokenId);
   
-      // get tokenId
-      $tokenId = $settings[$provider];
+        // populate token model
+        if(!$model)
+        {
+            $model = new Oauth_TokenModel;
+        }
   
-      // get token
-      $model = craft()->oauth->getTokenById($tokenId);
+        $model->providerHandle = $provider;
+        $model->pluginHandle = 'placid';
+        $model->encodedToken = craft()->oauth->encodeToken($token);
+  
+        // save token
+        craft()->oauth->saveToken($model);
+  
 
-      // populate token model
-      if(!$model)
-      {
-          $model = new Oauth_TokenModel;
-      }
-
-      $model->providerHandle = $provider;
-      $model->pluginHandle = 'placid';
-      $model->encodedToken = craft()->oauth->encodeToken($token);
-
-      // save token
-      craft()->oauth->saveToken($model);
-
-
-      // If its an instagram token, save that into the tokens bit on placid
-      // -----------------------------------------------------------------------------
-
-      if($model->providerHandle == 'instagram' && $model->encodedToken != '') {
-
-        // Get the decoded token from the OAuth plugin
-        $tokenModel = craft()->oauth->decodeToken($model->encodedToken);
-
-        // Encrypt the token the Placid way
-        $token = craft()->security->hashData($tokenModel->getAccessToken());
-
-        // Set the attributes for the model
-        $atts = array(
-          'name' => ucfirst($model->providerHandle),
-          'encoded_token' => $token,
-          'token_handle' => $model->providerHandle,
-        );
-
-        // Set the new token model with the attributes
-        $placidTokenModel = craft()->placid_token->newToken($atts);
-
-        // Save the token in the access tokens part
-        craft()->placid_token->saveToken($placidTokenModel);
-
-      }
-
-      // set token ID
-      $settings[$provider] = $model->id;
-
-      // save plugin settings
-      craft()->plugins->savePluginSettings($plugin, $settings);
-
-      return true;
+        // If its an instagram token, save that into the tokens bit on placid
+        // -----------------------------------------------------------------------------
+  
+        if($model->providerHandle == 'instagram' && $model->encodedToken != '') {
+  
+          // Get the decoded token from the OAuth plugin
+          $tokenModel = craft()->oauth->decodeToken($model->encodedToken);
+  
+          // Encrypt the token the Placid way
+          $token = craft()->security->hashData($tokenModel->getAccessToken());
+  
+          // Set the attributes for the model
+          $atts = array(
+            'name' => ucfirst($model->providerHandle),
+            'encoded_token' => $token,
+            'token_handle' => $model->providerHandle,
+          );
+  
+          // Set the new token model with the attributes
+          $placidTokenModel = craft()->placid_token->newToken($atts);
+  
+          // Save the token in the access tokens part
+          craft()->placid_token->saveToken($placidTokenModel);
+  
+        }
+  
+        // set token ID
+        $settings[$provider] = $model->id;
+  
+        // save plugin settings
+        craft()->plugins->savePluginSettings($plugin, $settings);
+  
+        return true;
     }
 
     /**
@@ -288,9 +289,8 @@ class Placid_RequestsService extends BaseApplicationComponent
         {
           return $this->_get($requestRecord, $options);
         }
-        
-        return $cachedRequest;
 
+        return $cachedRequest;
       }
       else
       {
@@ -313,11 +313,14 @@ class Placid_RequestsService extends BaseApplicationComponent
 
         $provider = craft()->oauth->getProvider($auth);
         $tokenModel = $this->getToken($auth);
+
         if(!$tokenModel)
         {
             return null;
         }
+
         $token = $tokenModel->token;
+        
         if(!$provider || !$token)
         {
             return null;
@@ -379,7 +382,7 @@ class Placid_RequestsService extends BaseApplicationComponent
       // If there are params, add them to the url
       if($params)
       {
-          $url .= '?' . $params;
+          $url .= '?'.$params;
       }
 
       // Get the access token from the record
@@ -396,7 +399,7 @@ class Placid_RequestsService extends BaseApplicationComponent
       // Use Guzzle to GET the request assign the response to a variable
       $response = $client->get($url, $headers, $postFields)->send();
 
-      // Update this variable with a JSON object
+      // Update this variable with a JSON conversion
       $response = $response->json();
 
       // If cache is enabled save a new cache, first check if it is set in template, if not, load from settings

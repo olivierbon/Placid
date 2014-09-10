@@ -4,60 +4,75 @@ namespace Craft;
 class Placid_RequestsController extends BaseController
 {
 
-    private function _prepParams($array, $params = null)
-    {
-      $params = base64_encode(serialize($array));
-      return $params;
-    }
+    /**
+    * Action to save request
+    *
+    * @return null
+    */
+
     public function actionSaveRequest()
     {
-        Craft::log(__METHOD__, LogLevel::Info, true);
+      Craft::log(__METHOD__, LogLevel::Info, true);
 
-        if($id = craft()->request->getPost('requestId')) {
-          $model = craft()->placid_requests->findRequestById($id);
-        } else {
-          $model = craft()->placid_requests->newRequest($id);
-        }
+      // Determine whether this is an existing or new request
+      // -----------------------------------------------------------------------------
 
-       $params = craft()->request->getPost('params');
+      if($id = craft()->request->getPost('requestId')) {
+        $model = craft()->placid_requests->findRequestById($id);
+      } else {
+        $model = craft()->placid_requests->newRequest($id);
+      }
 
-       $params = $this->_prepParams($params);
+      // Get the params from the form
+      $params = craft()->request->getPost('params');
 
-        $atts = array(
-          'name' => craft()->request->getPost('requestName'),
-          'handle' => craft()->request->getPost('handle'),
-          'oauth' => craft()->request->getPost('oauth'),
-          'tokenId' => craft()->request->getPost('tokenId'),
-          'url' => craft()->request->getPost('requestUrl'),
-          'params' => $params,
-        );
+      // Prepare the params for entry
+      // -----------------------------------------------------------------------------
 
-        $model->setAttributes($atts);
+      $params = $this->_prepParams($params);
 
-        if(craft()->placid_requests->saveRequest($model)) {
-          craft()->userSession->setNotice(Craft::t('Request saved'));
-          return $this->redirectToPostedUrl(array('requestId' => $model->getAttribute('id')));
-        } else {
-          craft()->userSession->setError(Craft::t("Couldn't save request."));
+      // Define the record attributes
+      $atts = array(
+        'name' => craft()->request->getPost('requestName'),
+        'handle' => craft()->request->getPost('handle'),
+        'oauth' => craft()->request->getPost('oauth'),
+        'tokenId' => craft()->request->getPost('tokenId'),
+        'url' => craft()->request->getPost('requestUrl'),
+        'params' => $params,
+      );
 
-            craft()->urlManager->setRouteVariables(array('request' => $model));
-        }
+      // Set these new attributes in the model
+      $model->setAttributes($atts);
+
+      // Try and save the request, otherwise show an error
+      // -----------------------------------------------------------------------------
+
+      if(craft()->placid_requests->saveRequest($model))
+      {
+        craft()->userSession->setNotice(Craft::t('Request saved'));
+        return $this->redirectToPostedUrl(array('requestId' => $model->getAttribute('id')));
+      }
+      else
+      {
+        craft()->userSession->setError(Craft::t("Couldn't save request."));
+        craft()->urlManager->setRouteVariables(array('request' => $model));
+      }
+
     }
 
-     /**
-     * Delete Ingredient
-     *
-     * Delete an existing ingredient
+    /**
+     * Delete a request
      */
+
     public function actionDeleteRequest()
     {
-        $this->requirePostRequest();
-        $this->requireAjaxRequest();
+       $this->requirePostRequest();
+       $this->requireAjaxRequest();
 
-        $id = craft()->request->getRequiredPost('id');
-        craft()->placid_requests->deleteRecordById($id);
+       $id = craft()->request->getRequiredPost('id');
+       craft()->placid_requests->deleteRecordById($id);
 
-        $this->returnJson(array('success' => true));
+       $this->returnJson(array('success' => true));
     }
 
 
@@ -67,29 +82,29 @@ class Placid_RequestsController extends BaseController
      */
     public function actionConnect($provider, array $variables = array())
     {
-        if($response = craft()->oauth->connect(array(
-            'plugin' => 'placid',
-            'provider' => $provider
-        )))
+      if($response = craft()->oauth->connect(array(
+        'plugin' => 'placid',
+        'provider' => $provider
+      )))
+      {
+        if($response['success'])
         {
-            if($response['success'])
-            {
-                // token
-                $token = $response['token'];
+          // token
+          $token = $response['token'];
 
-                // save token
-                craft()->placid_requests->saveToken($token, $provider);
+          // save token
+          craft()->placid_requests->saveToken($token, $provider);
 
-                // session notice
-                craft()->userSession->setNotice(Craft::t("Connected"));
-            }
-            else
-            {
-                craft()->userSession->setError(Craft::t($response['errorMsg']));
-            }
-
-            $this->redirect($response['redirect']);
+          // session notice
+          craft()->userSession->setNotice(Craft::t("Connected"));
         }
+        else
+        {
+          craft()->userSession->setError(Craft::t($response['errorMsg']));
+        }
+        
+        $this->redirect($response['redirect']);
+      }
     }
 
     /**
@@ -106,5 +121,16 @@ class Placid_RequestsController extends BaseController
         // redirect
         $redirect = craft()->request->getUrlReferrer();
         $this->redirect($redirect);
+    }
+
+
+    /**
+     * Get the params from the database
+     */
+
+    private function _prepParams($array, $params = null)
+    {
+      $params = base64_encode(serialize($array));
+      return $params;
     }
 }

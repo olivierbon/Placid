@@ -10,13 +10,9 @@ class PlacidVariable
     {
         return craft()->placid_requests->getToken($provider);
     }
-    public function get($handle, $options = array() )
+    public function get($handle, $options = array())
     {
         return craft()->placid_requests->findRequestByHandle($handle, $options);
-    }
-    public function account($handle)
-    {
-        return craft()->oauth->getAccount($handle, $handle . '.system');
     }
     public function getaccessTokens()
     {
@@ -25,6 +21,9 @@ class PlacidVariable
     public function getAllRequests()
     {
         return craft()->placid_requests->getAllRequests();
+    }
+    public function accesstoken($id) {
+        return craft()->placid_token->findTokenById($id);
     }
     public function token($provider) {
         return craft()->placid_requests->getToken($provider);
@@ -44,8 +43,11 @@ class PlacidVariable
     }
     public function getProviders()
     {
-        $twitter = craft()->oauth->getProvider('twitter');
-        $values = array(null => 'None', $twitter['handle'] => $twitter['name']);
+        $providers = craft()->oauth->getProviders();
+        $values = [null => 'None'];
+        foreach($providers as $key => $value) {
+            $values[$key] = $value['name'];
+        }
         return $values;
     }
 }

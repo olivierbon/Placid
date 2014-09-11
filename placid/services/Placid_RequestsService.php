@@ -395,7 +395,7 @@ class Placid_RequestsService extends BaseApplicationComponent
         $params ? $url .= '&' : $url .= '?';
         $url .= $this->_buildAccessTokenQuery($requestRecord, $accesstoken);
       }
-
+ 
       // Use Guzzle to GET the request assign the response to a variable
       $response = $client->get($url, $headers, $postFields)->send();
 
@@ -426,35 +426,25 @@ class Placid_RequestsService extends BaseApplicationComponent
 
     private function _buildParams($requestRecord, $options)
     {
-      $params = '';
+      $params = array();
       // Get any control panel parameters
       $cpParams = unserialize(base64_decode($requestRecord->getAttribute('params')));
-      
-      // Are the parameters set in the template?
-      if(isset($options['params']))
-      {
-        $params = $options['params'];
+      $optionParams = array_key_exists('params', $options) ? $options['params'] : null;
 
-        // Determine whether the params are an array
-        if(is_array($params))
-        {
-          $params = http_build_query($params, '', '&amp;');
-        }
-        else
-        {
-          // If the params are not an array, we can't build it so we throw an exception
-          throw new Exception(Craft::t('Parameters argument is not an array'));
-        }
-      }
+      if(is_array($optionParams))
+      {
+        $params = array_merge($optionParams, $params);
+      } 
       else if(is_array($cpParams))
       {
-        $counter = 0;
-        foreach($cpParams as $key => $value)
+        foreach($cpParams as $key => $param)
         {
-          $params .= ($counter++ >= 1 ? '&' : '').$value['key'].'='.$value['value'];
+          $params[$param['key']] = $param['value'];
         }
-      } 
-            
+      }
+
+      $params = http_build_query($params, '', '&');
+    
       return $params;
     }
 

@@ -32,7 +32,7 @@
 ] %}
 
 {% set content %}
-  <form method="post" action="" accept-charset="UTF-8" data-saveshortcut="1" data-saveshortcut-redirect="/admin/placid/edit/request/{{ requestId }}">
+  <form method="post" action="" accept-charset="UTF-8" data-saveshortcut="1" data-saveshortcut-redirect="/admin/placid/{% if requestId %}edit/request/{{ requestId }}{% endif %}">
     <input type="hidden" name="action" value="placid/requests/saveRequest">
     <input type="hidden" name="redirect" value="placid" />
     <input type="hidden" name="requestId" value="{{ requestId }}" />

@@ -44,7 +44,7 @@ class PlacidVariable
     public function getProviders()
     {
         $providers = craft()->oauth->getProviders();
-        $values = [null => 'None'];
+        $values[null] = 'None';
         foreach($providers as $key => $value) {
             $values[$key] = $value['name'];
         }

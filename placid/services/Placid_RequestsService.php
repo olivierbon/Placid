@@ -278,18 +278,46 @@ class Placid_RequestsService extends BaseApplicationComponent
       if($requestRecord)
       {
 
+        // Build the url from the request record and options
+        // -----------------------------------------------------------------------
+
+        // Taken directly from the record
+        $baseUrl = $requestRecord->getAttribute('url');
+
+        // Now we need to add any segments and parameters, so lets add the segments first.
+        $segments = $this->_buildSegments($options);
+
+        $segments ? $baseUrl = $baseUrl . $segments : '';
+
+        // Get the parameters from the options and record
+        $params = $this->_buildParams($requestRecord, $options);
+
+        $params ? $baseUrl = $baseUrl . '?' . $params : '' ;
+
+        // Get the access token from the record
+        $accesstoken = $requestRecord->getAttribute('tokenId');
+
+        // If there is an access token, we need to build it into the query
+        if($accesstoken)
+        {
+          // If there are no current params, we will need to start with a ?
+          $params ? $baseUrl .= '&' : $baseUrl .= '?';
+          $baseUrl .= $this->_buildAccessTokenQuery($requestRecord, $accesstoken);
+        }
+
         // Get a cached request
-        $cachedRequest = craft()->placid_cache->get($requestRecord['cache_id']);
+        $cachedRequest = craft()->placid_cache->get(base64_encode( urlencode($baseUrl) ));
 
         // Do we need to try serve a cached version or not
         $c = array_key_exists('cache', $options) ? $options['cache'] : true;
 
+        
         // If cache_id is null or craft cache returns false, continue with live pull
-        if( ! $c || ! $requestRecord['cache_id'] || ! $cachedRequest )
+        if( ! $c || ! $cachedRequest )
         {
-          return $this->_get($requestRecord, $options);
+          // return 'live';
+          return $this->_get($requestRecord, $baseUrl, $options);
         }
-
         return $cachedRequest;
       }
       else
@@ -355,46 +383,14 @@ class Placid_RequestsService extends BaseApplicationComponent
      * @return array $response
      */
 
-    private function _get($requestRecord,$options = null, $method = 'get', $headers = null, $postFields = null)
+    private function _get($requestRecord, $url, $options = null, $method = 'get', $headers = null, $postFields = null)
     {
-
-      // Get the url from the request record
-      $url = $requestRecord->getAttribute('url');
 
       // Create a new Guzzle Client
       $client = new Client($url);
 
       // Check whether there is an oauth attribute and if so, authenticate the request
       $requestRecord->getAttribute('oauth') ? $this->_authenticateOauth($requestRecord->getAttribute('oauth'), $client) : '';
-
-      // Get the params from the builder
-      $params = $this->_buildParams($requestRecord, $options);
-
-      // Get the segments from the builder
-      $segments = $this->_buildSegments($options);
-
-      // If there are segments, add them to the url
-      if($segments)
-      {
-          $url .= $segments;
-      }
-
-      // If there are params, add them to the url
-      if($params)
-      {
-          $url .= '?'.$params;
-      }
-
-      // Get the access token from the record
-      $accesstoken = $requestRecord->getAttribute('tokenId');
-
-      // If there is an access token, we need to build it into the query
-      if($accesstoken)
-      {
-        // If there are no current params, we will need to start with a ?
-        $params ? $url .= '&' : $url .= '?';
-        $url .= $this->_buildAccessTokenQuery($requestRecord, $accesstoken);
-      }
  
       // Use Guzzle to GET the request assign the response to a variable
       $response = $client->get($url, $headers, $postFields)->send();
@@ -405,9 +401,10 @@ class Placid_RequestsService extends BaseApplicationComponent
       // If cache is enabled save a new cache, first check if it is set in template, if not, load from settings
       $cache = array_key_exists('cache', $options) ? $options['cache'] : $this->placid_settings['cache'];
 
+      
       if($cache)
       {
-          craft()->placid_cache->set($requestRecord, $response);
+          craft()->placid_cache->set($url, $response);
       }
 
       return $response;
@@ -481,6 +478,7 @@ class Placid_RequestsService extends BaseApplicationComponent
       return null;
     }
     
+
     /**
      * Delete a request from the database.
      *

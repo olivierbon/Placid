@@ -2,7 +2,8 @@
 
 namespace Craft;
 
-use Guzzle\Http\Client;
+use Guzzle\Http\Client as Client;
+use Guzzle\Http\Message\EntityEnclosingRequest as EntityEnclosingRequest;
 
 
 class Placid_RequestsService extends BaseApplicationComponent
@@ -10,6 +11,10 @@ class Placid_RequestsService extends BaseApplicationComponent
 
     protected $requestRecord;
     protected $placid_settings;
+    protected $segments;
+    protected $cache;
+    protected $method;
+    protected $query;
     private $token;
 
     public function __construct($requestRecord = null)
@@ -20,7 +25,6 @@ class Placid_RequestsService extends BaseApplicationComponent
         {
             $this->requestRecord = Placid_RequestsRecord::model();
         }
-
         // Get the plugin
         $plugin = craft()->plugins->getPlugin('placid');
 
@@ -28,13 +32,68 @@ class Placid_RequestsService extends BaseApplicationComponent
         $this->placid_settings = $plugin->getSettings();
     }
 
+    public function setOptions($options = array())
+    {
+      $this->segments = (array_key_exists('method', $options) ? $options['segments'] : null);
+      $this->method = (array_key_exists('method', $options) ? $options['method'] : 'GET');
+      $this->query =  (array_key_exists('query', $options) ? $options['query'] : null);
+      // This needs to be deprecated
+      $this->query = (array_key_exists('params', $options) ? $options['params'] : $this->query);
+      $this->cache = (array_key_exists('cache', $options) ? $options['cache'] : $this->placid_settings['cache']);
+
+      return $this;
+    }
+
+    /**
+    * Make the request
+    *
+    * This method will create a new client and get a response from a Guzzle request
+    *                                   
+    * @param string|null      $handle     The handle of the request record
+    *
+    * @return array   the req
+    */
+
+    public function request($handle)
+    {
+      $client = new Client();
+
+      $record = $this->findRequestByHandle($handle);
+
+      $baseUrl = $record->getAttribute('url');
+
+      // Get a cached request
+      $cachedRequest = craft()->placid_cache->get(base64_encode( urlencode($baseUrl) ));
+
+      $request = $this->_createRequest($client, $record);
+
+
+      // Do we need to serve a cached version or not
+      Craft::import('plugins.placid.events.PlacidRequestEvent');
+
+      $event = new PlacidRequestEvent($this, array('request' => $request));
+      craft()->placid_requests->onBeforeRequest($event);
+
+      if($event->makeRequest)
+      {
+        if( (! $this->cache || ! $cachedRequest) && $event->bypassCache)
+        {
+          return $this->_getResponse($client, $request);
+        }
+        else
+        {
+          return $cachedRequest;
+        }
+      }
+      
+    }
     /**
     * Get the token from a provider
     *                                   
     * @param string|null      $provider     The handle of the provider
     *
     * @return string   the token if the method was successful. 
-    *                  A null value will be returned if no token exists
+    * A null value will be returned if no token exists
     */
 
     public function getToken($provider = null)
@@ -46,19 +105,14 @@ class Placid_RequestsService extends BaseApplicationComponent
         }
         else
         {
-            // get plugin
-            $plugin = craft()->plugins->getPlugin('placid');
-
             // get settings
-            $settings = $plugin->getSettings();
+            $settings = $this->placid_settings;
 
             // get tokenId
             $tokenId = $settings[$provider];
 
             // get token
             $token = craft()->oauth->getTokenById($tokenId);
-
-
             if($token && $token->token)
             {
                 $this->token = $token;
@@ -86,7 +140,7 @@ class Placid_RequestsService extends BaseApplicationComponent
         $plugin = craft()->plugins->getPlugin('placid');
   
         // get settings
-        $settings = $plugin->getSettings();
+        $settings = $this->placid_settings;
     
         // get tokenId
         $tokenId = $settings[$provider];
@@ -106,34 +160,7 @@ class Placid_RequestsService extends BaseApplicationComponent
   
         // save token
         craft()->oauth->saveToken($model);
-  
-
-        // If its an instagram token, save that into the tokens bit on placid
-        // -----------------------------------------------------------------------------
-  
-        if($model->providerHandle == 'instagram' && $model->encodedToken != '') {
-  
-          // Get the decoded token from the OAuth plugin
-          $tokenModel = craft()->oauth->decodeToken($model->encodedToken);
-  
-          // Encrypt the token the Placid way
-          $token = craft()->security->hashData($tokenModel->getAccessToken());
-  
-          // Set the attributes for the model
-          $atts = array(
-            'name' => ucfirst($model->providerHandle),
-            'encoded_token' => $token,
-            'token_handle' => $model->providerHandle,
-          );
-  
-          // Set the new token model with the attributes
-          $placidTokenModel = craft()->placid_token->newToken($atts);
-  
-          // Save the token in the access tokens part
-          craft()->placid_token->saveToken($placidTokenModel);
-  
-        }
-  
+    
         // set token ID
         $settings[$provider] = $model->id;
   
@@ -208,7 +235,6 @@ class Placid_RequestsService extends BaseApplicationComponent
             return false;
         }
     }
-
     /**
      * Get all placid requests
      *
@@ -258,67 +284,23 @@ class Placid_RequestsService extends BaseApplicationComponent
     * @return mixed
     */
 
-    public function findRequestByHandle($handle, $options)
+    public function findRequestByHandle($handle)
     {
       Craft::log(__METHOD__, LogLevel::Info, true);
 
       // Get the request record by its handle
       // ---------------------------------------------
 
-      $requestRecord =  $this->requestRecord->find(
+      $record =  $this->requestRecord->find(
         'handle=:handle',
         array(
           ':handle' => $handle
         )
       );
 
-      // Determine if there is a requestRecord and act accordingly
-      // -----------------------------------------------------------------------------
-
-      if($requestRecord)
+      if($record)
       {
-
-        // Build the url from the request record and options
-        // -----------------------------------------------------------------------
-
-        // Taken directly from the record
-        $baseUrl = $requestRecord->getAttribute('url');
-
-        // Now we need to add any segments and parameters, so lets add the segments first.
-        $segments = $this->_buildSegments($options);
-
-        $segments ? $baseUrl = $baseUrl . $segments : '';
-
-        // Get the parameters from the options and record
-        $params = $this->_buildParams($requestRecord, $options);
-
-        $params ? $baseUrl = $baseUrl . '?' . $params : '' ;
-
-        // Get the access token from the record
-        $accesstoken = $requestRecord->getAttribute('tokenId');
-
-        // If there is an access token, we need to build it into the query
-        if($accesstoken)
-        {
-          // If there are no current params, we will need to start with a ?
-          $params ? $baseUrl .= '&' : $baseUrl .= '?';
-          $baseUrl .= $this->_buildAccessTokenQuery($requestRecord, $accesstoken);
-        }
-
-        // Get a cached request
-        $cachedRequest = craft()->placid_cache->get(base64_encode( urlencode($baseUrl) ));
-
-        // Do we need to try serve a cached version or not
-        $c = array_key_exists('cache', $options) ? $options['cache'] : true;
-
-        
-        // If cache_id is null or craft cache returns false, continue with live pull
-        if( ! $c || ! $cachedRequest )
-        {
-          // return 'live';
-          return $this->_get($requestRecord, $baseUrl, $options);
-        }
-        return $cachedRequest;
+        return Placid_RequestsModel::populateModel($record);
       }
       else
       {
@@ -326,8 +308,78 @@ class Placid_RequestsService extends BaseApplicationComponent
       }
     }
 
+    /**
+    * Create a new request object
+    *                                   
+    * @param array     $attributes  The attributes to save against the model 
+    *
+    * @return object    returns EntityEnclosingRequest $request
+    *          
+    */
+    private function _createRequest($client, $record)
+    {
+      $request = $client->createRequest($this->method, $record->getAttribute('url'));
 
+      if($this->segments)
+      {
+        $request->setPath($this->segments);
+      }
 
+      $query = $request->getQuery();
+
+      // Get the parameters from the record
+      $cpQuery = unserialize(base64_decode($record->getAttribute('params')));
+      
+      // If they exist, add them to the query
+      if($cpQuery)
+      {
+        foreach($cpQuery as $k => $q)
+        {
+          $query->set($q['key'], $q['value']);
+        }
+      } 
+      elseif($this->query)
+      {
+        foreach($this->query as $key => $value)
+        {
+          $query->set($key, $value);
+        }
+      }
+
+      if($provider = $record->getAttribute('oauth'))
+      {
+        $this->_authenticate($request,$provider);
+      }
+
+      if($tokenId = $record->getAttribute('tokenId'))
+      {
+        $tokenModel = craft()->placid_token->findTokenById($tokenId);
+        $token = $tokenModel->getAttribute('encoded_token');
+        $query->set('access_token', $token);
+      }
+
+      
+      return $request;
+    }
+
+    /**
+     * Get the response from a client and request
+     *
+     * @param Client $client a guzzle client
+     * @param object $request a guzzle request object
+     * @return array the response
+     */
+
+    private function _getResponse(Client $client, $request)
+    {
+      $response = $client->send($request);
+      
+      if($this->cache)
+      {
+          craft()->placid_cache->set($request->getUrl(), $response->json());
+      }
+      return $response->json();
+    }
     /**
      * Authenticate the request, used if OAuth provider is chosen on request creation
      *
@@ -336,148 +388,30 @@ class Placid_RequestsService extends BaseApplicationComponent
      * @return boolean
      */
 
-    private function _authenticateOauth($auth, $client)
+    private function _authenticate($client, $auth, $type = 'oauth')
     {
-
+      // If we want to authenticate using oauth, not just access tokens
+      if($type == 'oauth')
+      {
         $provider = craft()->oauth->getProvider($auth);
         $tokenModel = $this->getToken($auth);
-
-        if(!$tokenModel)
-        {
-            return null;
-        }
-
-        $token = $tokenModel->token;
-        
-        if(!$provider || !$token)
-        {
-            return null;
-        }
-
-        $oauth = new \Guzzle\Plugin\Oauth\OauthPlugin(array(
-            'consumer_key'    => $provider->clientId,
-            'consumer_secret' => $provider->clientSecret,
-            'token'           => $token->getAccessToken(),
-            'token_secret'    => $token->getAccessTokenSecret()
-        ));
-
-        $client->addSubscriber($oauth);
-
-        return true;
-    }
-
-    /**
-     * Creates the Guzzle client and sends
-     * the GET request
-     *
-     * @param  model $requestRecord
-     *
-     * @param  array $options null
-     *
-     * @param  string $method
-     *
-     * @param  string $headers null
-     *
-     * @param  array $postFields null
-     *
-     * @return array $response
-     */
-
-    private function _get($requestRecord, $url, $options = null, $method = 'get', $headers = null, $postFields = null)
-    {
-
-      // Create a new Guzzle Client
-      $client = new Client($url);
-
-      // Check whether there is an oauth attribute and if so, authenticate the request
-      $requestRecord->getAttribute('oauth') ? $this->_authenticateOauth($requestRecord->getAttribute('oauth'), $client) : '';
- 
-      // Use Guzzle to GET the request assign the response to a variable
-      $response = $client->get($url, $headers, $postFields)->send();
-
-      // Update this variable with a JSON conversion
-      $response = $response->json();
-
-      // If cache is enabled save a new cache, first check if it is set in template, if not, load from settings
-      $cache = array_key_exists('cache', $options) ? $options['cache'] : $this->placid_settings['cache'];
-
+      }
       
-      if($cache)
+      if(!$tokenModel)
       {
-          craft()->placid_cache->set($url, $response);
+        return null;
       }
 
-      return $response;
+      $token = $tokenModel->token;
+
+      $oauth = new \Guzzle\Plugin\Oauth\OauthPlugin(array(
+        'consumer_key'    => $provider->clientId,
+        'consumer_secret' => $provider->clientSecret,
+        'token'           => $token->getAccessToken(),
+        'token_secret'    => $token->getAccessTokenSecret()
+      ));
+      return $client->addSubscriber($oauth);
     }
-
-    /**
-    * Build the params for the url
-    *
-    * Determine how we are going to add the params (this needs improving)
-    * and then build the parameters to append to the url.
-    *
-    * @param  model $requestRecord
-    * @param  array $options
-    * @return string
-    */
-
-    private function _buildParams($requestRecord, $options)
-    {
-      $params = array();
-      // Get any control panel parameters
-      $cpParams = unserialize(base64_decode($requestRecord->getAttribute('params')));
-      $optionParams = array_key_exists('params', $options) ? $options['params'] : null;
-
-      if(is_array($optionParams))
-      {
-        $params = array_merge($optionParams, $params);
-      } 
-      else if(is_array($cpParams))
-      {
-        foreach($cpParams as $key => $param)
-        {
-          $params[$param['key']] = $param['value'];
-        }
-      }
-
-      $params = http_build_query($params, '', '&');
-    
-      return $params;
-    }
-
-    /**
-     * Builds the access token query
-     *
-     * @param  model $requestRecord
-     * @param  int $tokenId
-     * @return string
-     */
-
-    public function _buildAccessTokenQuery($requestRecord, $tokenId)
-    {
-      $tokenModel = craft()->placid_token->findTokenById($tokenId);
-      $token = $tokenModel->getAttribute('encoded_token');
-      $query = 'access_token=' . $token;
-      return $query;
-    }
-
-    /**
-     * Build the segments from options
-     *
-     * @param  array $options
-     * @return mixed segments or null
-     */
-
-    private function _buildSegments($options)
-    {
-      if(isset($options['segments']))
-      {
-          $segments = $options['segments'];
-          return $segments;
-      }
-      return null;
-    }
-    
 
     /**
      * Delete a request from the database.
@@ -490,4 +424,16 @@ class Placid_RequestsService extends BaseApplicationComponent
         return $this->requestRecord->deleteByPk($id);
     }
 
+    // Events
+    // ---------------------------------------------
+
+    /**
+     * Fires an 'onBeforeRequest' event.
+     *
+     * @param GuestEntriesEvent $event
+     */
+    public function onBeforeRequest(PlacidRequestEvent $event)
+    {
+      $this->raiseEvent('onBeforeRequest', $event);
+    }
 }

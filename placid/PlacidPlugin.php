@@ -10,7 +10,7 @@ class PlacidPlugin extends BasePlugin
   }
   function getVersion()
   {
-    return '1.0.6';
+    return '1.2.0';
   }
   function getDeveloper()
   {
@@ -34,12 +34,6 @@ class PlacidPlugin extends BasePlugin
             'placid/oauth' => 'placid/_oauth',
             'placid/auth' => 'placid/_auth',
        );
-  }
-  function registerCachePaths()
-  {
-      return array(
-          craft()->path->getStoragePath().'placid_requests/' => Craft::t('Placid requests'),
-      );
   }
   /**
    * Defines the settings.

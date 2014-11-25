@@ -11,7 +11,7 @@
 {% if requestId is not defined %} {% set requestId = null %}{% endif %}
 {% if request is not defined %}
   {% if requestId %}
-    {% set request = craft.placid.request(requestId) %}
+    {% set request = craft.placid.findRequestById(requestId) %}
     {% if not request %}{% exit 404 %}{% endif %}
   {% else %}
     {% set request = null %}

@@ -12,7 +12,11 @@ class PlacidVariable
     }
     public function get($handle, $options = array())
     {
-        return craft()->placid_requests->findRequestByHandle($handle, $options);
+        return $this->request($handle, $options);
+    }
+    public function request($handle, $options = array())
+    {
+        return craft()->placid_requests->setOptions($options)->request($handle);
     }
     public function getaccessTokens()
     {
@@ -28,7 +32,7 @@ class PlacidVariable
     public function token($provider) {
         return craft()->placid_requests->getToken($provider);
     }
-    public function request($id)
+    public function findRequestById($id)
     {
         return craft()->placid_requests->findRequestById($id);
     }

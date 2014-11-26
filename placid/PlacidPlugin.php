@@ -10,7 +10,7 @@ class PlacidPlugin extends BasePlugin
   }
   function getVersion()
   {
-    return '1.2.0';
+    return '1.2.5';
   }
   function getDeveloper()
   {
@@ -73,7 +73,6 @@ public function onBeforeUninstall()
   {
       $exampleRequest = array('name'=> 'Dribbble shots', 'url' => 'http://api.dribbble.com/shots/everyone', 'handle' => 'dribbbleShots', 'oauth' => '', 'params' => '');
       craft()->db->createCommand()->insert('placid_requests', $exampleRequest);
-
   }
 
 }

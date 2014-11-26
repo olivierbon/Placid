@@ -2,9 +2,9 @@
 namespace Craft;
 
 /**
- * Guest Entries event
+ * Placid beforeRequest event
  */
-class PlacidRequestEvent extends Event
+class PlacidBeforeRequestEvent extends Event
 {
 	/**
 	 * @var bool Whether to make the request
@@ -14,5 +14,5 @@ class PlacidRequestEvent extends Event
 	/**
 	 * @var bool Whether to bypass the cache
 	 */
-	public $bypassCache = true;
+	public $bypassCache = false;
 }

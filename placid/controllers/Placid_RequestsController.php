@@ -3,6 +3,7 @@ namespace Craft;
 
 class Placid_RequestsController extends BaseController
 {
+    protected $allowAnonymous = array('actionRequest');
 
     /**
     * Action to save request
@@ -60,6 +61,17 @@ class Placid_RequestsController extends BaseController
 
     }
 
+    public function actionRequest()
+    {
+      $this->requireAjaxRequest();
+
+      $handle = craft()->request->getQuery('handle');
+      $options = array();
+
+      $response = craft()->placid_requests->setOptions($options)->request($handle);
+
+      $this->returnJson($response);
+    }
     /**
      * Delete a request
      */

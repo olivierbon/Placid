@@ -4,7 +4,7 @@ namespace Craft;
 
 use Guzzle\Http\Client as Client;
 use Guzzle\Http\Message\EntityEnclosingRequest as EntityEnclosingRequest;
-
+use Guzzle\Http\Exception\RequestException as RequestException;
 
 class Placid_RequestsService extends BaseApplicationComponent
 {
@@ -13,6 +13,7 @@ class Placid_RequestsService extends BaseApplicationComponent
     protected $placid_settings;
     protected $segments;
     protected $cache;
+    protected $cacheLength;
     protected $method;
     protected $query;
     private $token;
@@ -37,6 +38,7 @@ class Placid_RequestsService extends BaseApplicationComponent
       $this->segments = (array_key_exists('method', $options) ? $options['segments'] : null);
       $this->method = (array_key_exists('method', $options) ? $options['method'] : 'GET');
       $this->query =  (array_key_exists('query', $options) ? $options['query'] : null);
+      $this->cacheLength = (array_key_exists('duration', $options) ? $options['duration'] : null);
       // This needs to be deprecated
       $this->query = (array_key_exists('params', $options) ? $options['params'] : $this->query);
       $this->cache = (array_key_exists('cache', $options) ? $options['cache'] : $this->placid_settings['cache']);
@@ -56,11 +58,13 @@ class Placid_RequestsService extends BaseApplicationComponent
 
     public function request($handle)
     {
+      
       $client = new Client();
 
       $record = $this->findRequestByHandle($handle);
-
+      
       $baseUrl = $record->getAttribute('url');
+      
 
       // Get a cached request
       $cachedRequest = craft()->placid_cache->get(base64_encode( urlencode($baseUrl) ));
@@ -71,6 +75,7 @@ class Placid_RequestsService extends BaseApplicationComponent
       // Do we need to serve a cached version or not
       Craft::import('plugins.placid.events.PlacidRequestEvent');
 
+     
       $event = new PlacidRequestEvent($this, array('request' => $request));
       craft()->placid_requests->onBeforeRequest($event);
 
@@ -372,12 +377,19 @@ class Placid_RequestsService extends BaseApplicationComponent
 
     private function _getResponse(Client $client, $request)
     {
-      $response = $client->send($request);
-      
+      try {
+        $response = $client->send($request);
+      } catch(RequestException $e) {
+        // If we are in devmode, return the error message
+          Craft::log('Placid - ' . $e->getMessage(), LogLevel::Error);
+          return null;
+      }
+        
       if($this->cache)
       {
-          craft()->placid_cache->set($request->getUrl(), $response->json());
+          craft()->placid_cache->set($request->getUrl(), $response->json(), $this->cacheLength);
       }
+
       return $response->json();
     }
     /**

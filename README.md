@@ -38,5 +38,13 @@ This is the main placid variable, use this to get the data from the request.
     {% for tweet in timeline %}
       {{ tweet.text }}
     {% endfor %}
+
+### Template parameters
+
+- `cache` _(bool)_ - Whether or not to cache the request, default is true
+- `duration` _(number)_ - The length of time in seconds to cache the request, default is whatever is in your default config
+- `query` _(array)_ - An array of key/value pairs to set in the query string
+- `method` _(string)_ - What method to use for the request, default is `GET`
+- `segments` _(string)_ - The segments to use in the request, overrides any set in admin
     
 For full instructions on how to use, [refer to docs](http://alecritson.co.uk/documentation/placid/introduction)

@@ -2,9 +2,9 @@
 
 namespace Craft;
 
-use Guzzle\Http\Client as Client;
-use Guzzle\Http\Message\EntityEnclosingRequest as EntityEnclosingRequest;
-use Guzzle\Http\Exception\RequestException as RequestException;
+use Guzzle\Http\Client;
+use Guzzle\Http\Message\EntityEnclosingRequest;
+use Guzzle\Http\Exception\RequestException;
 
 class Placid_RequestsService extends BaseApplicationComponent
 {
@@ -42,7 +42,7 @@ class Placid_RequestsService extends BaseApplicationComponent
     $this->query =  $this->_setOption($options, 'query');
     $this->query = $this->_setOption($options, 'params', $this->query); // This needs to be deprecated
     $this->cache = $this->_setOption($options, 'cache', $this->placid_settings['cache']);
-    
+
     return $this;
   }
 
@@ -67,8 +67,6 @@ class Placid_RequestsService extends BaseApplicationComponent
     $client = new Client();
 
     $record = $this->findRequestByHandle($handle);
-    
-    $baseUrl = $record->getAttribute('url');
     
     // Get a cached request
 
@@ -309,14 +307,12 @@ class Placid_RequestsService extends BaseApplicationComponent
    * @return boolean
    */
 
-  private function _authenticate($client, $auth, $type = 'oauth')
+  private function _authenticate($client, $auth)
   {
-    // If we want to authenticate using oauth, not just access tokens
-    if($type == 'oauth')
-    {
-      $provider = craft()->oauth->getProvider($auth);
-      $tokenModel = $this->getToken($auth);
-    }
+
+    $provider = craft()->oauth->getProvider($auth);
+    $tokenModel = $this->getToken($auth);
+    
     
     if(!$tokenModel)
     {
@@ -333,8 +329,6 @@ class Placid_RequestsService extends BaseApplicationComponent
       ));
     return $client->addSubscriber($oauth);
   }
-
-  
 
   // Record Methods
   // =============================================================================

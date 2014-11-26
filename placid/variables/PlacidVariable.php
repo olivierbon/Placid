@@ -38,6 +38,7 @@ class PlacidVariable
     }
     public function selectTokens()
     {
+        $values = array();
         $tokens = craft()->placid_token->getAllTokens();
         $values[null] = 'None';
         foreach($tokens as $key => $value) {
@@ -47,6 +48,7 @@ class PlacidVariable
     }
     public function getProviders()
     {
+        $values = array();
         $providers = craft()->oauth->getProviders();
         $values[null] = 'None';
         foreach($providers as $key => $value) {

@@ -26,12 +26,15 @@ class Placid_CacheService extends BaseApplicationComponent
 		return craft()->cache->set($cacheId, $value, $duration, null);
 	}
 
+	/**
+	 * Get the request from cache
+	 *
+	 * @param string            $id         The key identifying the value to be cached.
+	 *
+	 * @return mixed the cached content if exists, null if not
+	 */
 	public function get($id)
 	{
 		return craft()->cache->get($id);
-	}
-
-	private function _generateCacheId($handle) {
-		return str_shuffle(sha1(time().microtime() . $handle));
 	}
 }

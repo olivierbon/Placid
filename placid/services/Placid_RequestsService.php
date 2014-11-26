@@ -34,19 +34,23 @@ class Placid_RequestsService extends BaseApplicationComponent
   }
 
 
-  public function setOptions($options = array())
+  public function getOptions($options = array())
   {
-    $this->segments = (array_key_exists('method', $options) ? $options['segments'] : null);
-    $this->method = (array_key_exists('method', $options) ? $options['method'] : 'GET');
-    $this->query =  (array_key_exists('query', $options) ? $options['query'] : null);
-    $this->cacheLength = (array_key_exists('duration', $options) ? $options['duration'] : null);
-    // This needs to be deprecated
-    $this->query = (array_key_exists('params', $options) ? $options['params'] : $this->query);
-    $this->cache = (array_key_exists('cache', $options) ? $options['cache'] : $this->placid_settings['cache']);
-
+    $this->segments = $this->_setOption($options, 'segments');
+    $this->method = $this->_setOption($options, 'method', 'GET');
+    $this->cacheLength = $this->_setOption($options, 'duration');
+    $this->query =  $this->_setOption($options, 'query');
+    $this->query = $this->_setOption($options, 'params', $this->query); // This needs to be deprecated
+    $this->cache = $this->_setOption($options, 'cache', $this->placid_settings['cache']);
+    
     return $this;
   }
 
+  public function _setOption($options, $key, $default = null)
+  {
+    $option = (array_key_exists($key, $options) ? $options[$key] : $default);
+    return $option;
+  }
   /**
   * Make the request
   *

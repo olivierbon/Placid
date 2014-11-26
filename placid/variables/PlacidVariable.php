@@ -16,7 +16,7 @@ class PlacidVariable
     }
     public function request($handle, $options = array())
     {
-        return craft()->placid_requests->setOptions($options)->request($handle);
+        return craft()->placid_requests->getOptions($options)->request($handle);
     }
     public function getaccessTokens()
     {

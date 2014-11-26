@@ -5,12 +5,12 @@ Placid is a Craft plugin which makes it easy to use REST services in your twig t
 ## Installing / Updating
 
 **Installing**
-- Download and unzip
+- [Download the latest release](https://github.com/alecritson/Placid/archive/v1.2.5.zip) and unzip
 - Upload the placid directory to craft/plugins
 - Install in admin area
 
 **Updating**
-- Download and unzip
+- [Download the latest release](https://github.com/alecritson/Placid/archive/v1.2.5.zip) and unzip
 - Replace placid directory in craft/plugins
 - Refresh admin section and run the update
 

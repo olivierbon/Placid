@@ -52,7 +52,7 @@ class PlacidVariable
         $providers = craft()->oauth->getProviders();
         $values[null] = 'None';
         foreach($providers as $key => $value) {
-            $values[$key] = $value['name'];
+            $values[$key] = ucfirst($key);
         }
         return $values;
     }

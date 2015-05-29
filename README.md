@@ -20,3 +20,5 @@ This now has support for the latest version of the OAuth plugin from Dukt, as of
 - Refresh admin section and run the update
 
 For full instructions on how to use, [refer to the wiki](https://github.com/alecritson/placid/wiki)
+
+For changes/update information, its all on the [project page of my site](http://itsalec.co.uk/projects/placid)

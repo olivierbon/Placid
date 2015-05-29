@@ -5,7 +5,7 @@ namespace Craft;
 use Guzzle\Http\Client;
 
 
-class Placid_TokenService extends BaseApplicationComponent
+class Placid_TokenService extends PlacidService
 {
 
     protected $tokenRecord;
@@ -13,8 +13,9 @@ class Placid_TokenService extends BaseApplicationComponent
 
     public function __construct($tokenRecord = null)
     {
-        
-      
+        $this->record = new Placid_TokenRecord;
+        $this->model = new Placid_TokenModel();
+
         $this->tokenRecord = $tokenRecord;
         if(is_null($this->tokenRecord)) {
             $this->tokenRecord = Placid_TokenRecord::model();
@@ -119,8 +120,13 @@ class Placid_TokenService extends BaseApplicationComponent
      */
     public function deleteRecordById($id)
     {
-        return $this->tokenRecord->deleteByPk($id);
+        return $this->record->deleteByPk($id);
     }
+
+    // public function encrypt($token)
+    // {
+    //   return craft()->security->hashPassword($token);
+    // }
 
    
 }

@@ -1,10 +1,8 @@
 {% extends "placid/_layout" %}
 
-{% set requests = craft.placid.getAllRequests %}
-
 {% set content %}
     <div class="buttons">
-      <a href="{{ url('placid/add')}}" class="btn submit add icon">Add request</a>
+      <a href="{{ url('placid/requests/new')}}" class="btn submit add icon">Add request</a>
     </div>
 
     <table id="fields" class="data fullwidth collapsible">
@@ -23,7 +21,7 @@
         {% for request in requests %}
           <tr data-id="{{ request.id }}" data-name="{{ request.name }}">
             <td>{{ request.id }}</td>
-            <td><a href="{{ url("placid/edit/request/" ~ request.id) }}">{{ request.name }}</a></td>
+            <td><a href="{{ url("placid/requests/" ~ request.id) }}">{{ request.name }}</a></td>
             <td>{{ request.handle }}</td>
             <td>{{ request.url }} </td>
             <td><span class="status {{ request.oauth ? 'live' : 'disabled' }}"></span> </td>

@@ -1,41 +1,21 @@
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 
-
-{% if craft.oauth.getProviders is defined %}
-    {% set providers = craft.placid.getProviders %}
-{% endif %}
-
-{% set accessTokens = craft.placid.selectTokens %}
-
-{% if requestId is not defined %} {% set requestId = null %}{% endif %}
-{% if request is not defined %}
-  {% if requestId %}
-    {% set request = craft.placid.findRequestById(requestId) %}
-    {% if not request %}{% exit 404 %}{% endif %}
-  {% else %}
-    {% set request = null %}
-  {% endif %}
-{% endif %}
-
 {% set title = request ? request.name : "New Request"|t %}
-
-{% if request.params is defined %}
-    {% set params = request.params %}
-{% else %}
-    {% set params = null %}
-{% endif %}
 
 {% set crumbs = [
     { label: "Placid"|t, url: url('placid') },
-    { label: request ? request.name : 'New request', url: url( request ? '/edit/request/' ~ request.id : 'add') }
+    { label: request ? request.name : 'New request', url: url( request ? '/requests/' ~ request.id : 'add') }
 ] %}
 
 {% set content %}
-  <form method="post" action="" accept-charset="UTF-8" data-saveshortcut="1" data-saveshortcut-redirect="/admin/placid/{% if requestId %}edit/request/{{ requestId }}{% endif %}">
+
+  <form method="post" action="" accept-charset="UTF-8" data-saveshortcut="1" data-saveshortcut-redirect="/admin/placid/{% if request %}requests/{{ request.id }}{% endif %}">
     <input type="hidden" name="action" value="placid/requests/saveRequest">
     <input type="hidden" name="redirect" value="placid" />
-    <input type="hidden" name="requestId" value="{{ requestId }}" />
+    {% if request %}
+      <input type="hidden" name="requestId" value="{{ request.id }}" />
+    {% endif %}
 
     {{ forms.textField({
       label: 'Name'|t,
@@ -66,8 +46,7 @@
       errors: request ? request.errors('url') : null
     }) }}
     
-    {% if providers is defined %}
-
+    {% if providers|length %}
       {{ forms.selectField({
         label: "Authentication" | t,
         name: 'oauth',
@@ -75,10 +54,9 @@
         options: providers,
         value : request ? request.oauth : null,
       }) }}
-
     {% endif %}
 
-    {% if accessTokens is defined %}
+    {% if accessTokens|length %}
       {{ forms.selectField({
         label: "Basic Authentication" | t,
         name: 'tokenId',
@@ -89,13 +67,13 @@
     {% endif %}
 
     {{ forms.editableTableField({
-      label: 'Params',
-      instructions : 'Define your url parameters below.',
+      label: 'Query String',
+      instructions : 'Define your query string.',
       id: 'params',
       rows: 4,
       textual: false,
       name: 'params',
-      addRowLabel : 'Add param',
+      addRowLabel : 'Add values',
       cols : {
         'key' : {
             'heading' : 'Key',
@@ -106,7 +84,7 @@
             'type'   : 'singleline'
         }
       },
-      rows : params
+      rows : request ? request.params : null
     }) }}
 
     <div class="buttons">
@@ -117,12 +95,5 @@
 
 {% set js %}
     new Craft.HandleGenerator('#name', '#handle');
-    var options, a;
-    jQuery(function(){
-        options = { serviceUrl:'http://apps.alecritson.co.uk/placid/suggestions' };
-        a = $('#query').autocomplete(options);
-    }); 
 {% endset %}
-{% includeCssResource "placid/css/placid.css" %}
-{% includeJsResource "placid/js/placid_autocomplete.js" %}
 {% includeJs js %}

@@ -16,19 +16,15 @@ class Placid_TokenController extends BaseController
     // -----------------------------------------------------------------------------
 
     if($id = craft()->request->getPost('tokenId')) {
-      $model = craft()->placid_token->findTokenById($id);
+      $model = craft()->placid_token->getById($id);
     } else {
       $model = craft()->placid_token->newToken($id);
     }
-
-    // Hash the token
-    $token = craft()->security->hashData(craft()->request->getPost('accessToken'));
         
     // Set the attributes for the model
     $atts = array(
-      'name' => craft()->request->getPost('requestName'),
-      'encoded_token' => $token,
-      'token_handle' => craft()->request->getPost('handle'),
+      'name' => craft()->request->getPost('name'),
+      'encoded_token' => craft()->request->getPost('token'),
     );
 
     // Set the attributes to the model
@@ -45,7 +41,7 @@ class Placid_TokenController extends BaseController
     else
     {
       craft()->userSession->setError(Craft::t("Couldn't save token."));
-      craft()->urlManager->setRouteVariables(array('auth' => $model));
+      craft()->urlManager->setRouteVariables(array('token' => $model));
     }
   }
 
@@ -63,5 +59,12 @@ class Placid_TokenController extends BaseController
     craft()->placid_token->deleteRecordById($id);
 
     $this->returnJson(array('success' => true));
+  }
+
+  public function poop($nugget)
+  {
+    echo "<pre>";
+    print_r($nugget);
+    die();
   }
 }

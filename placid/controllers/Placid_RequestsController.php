@@ -19,18 +19,17 @@ class Placid_RequestsController extends BaseController
       // -----------------------------------------------------------------------------
 
       if($id = craft()->request->getPost('requestId')) {
-        $model = craft()->placid_requests->findRequestById($id);
+        $model = craft()->placid_requests->getById($id);
       } else {
         $model = craft()->placid_requests->newRequest($id);
       }
+
 
       // Get the params from the form
       $params = craft()->request->getPost('params');
 
       // Prepare the params for entry
       // -----------------------------------------------------------------------------
-
-      $params = $this->_prepParams($params);
 
       // Define the record attributes
       $atts = array(
@@ -39,7 +38,7 @@ class Placid_RequestsController extends BaseController
         'oauth' => craft()->request->getPost('oauth'),
         'tokenId' => craft()->request->getPost('tokenId'),
         'url' => craft()->request->getPost('requestUrl'),
-        'params' => $params,
+        'params' => json_encode($params),
       );
 
       // Set these new attributes in the model
@@ -145,4 +144,11 @@ class Placid_RequestsController extends BaseController
       $params = base64_encode(serialize($array));
       return $params;
     }
+
+    public function poop($nugget)
+  {
+    echo "<pre>";
+    print_r($nugget);
+    die();
+  }
 }

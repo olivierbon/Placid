@@ -6,7 +6,7 @@ use Guzzle\Http\Client;
 use Guzzle\Http\Message\EntityEnclosingRequest;
 use Guzzle\Http\Exception\RequestException;
 
-class Placid_RequestsService extends BaseApplicationComponent
+class Placid_RequestsService extends PlacidService
 {
 
   protected $requestRecord;
@@ -18,19 +18,21 @@ class Placid_RequestsService extends BaseApplicationComponent
   protected $query;
   private $token;
 
-  public function __construct($requestRecord = null)
+  public function __construct($record = null)
   {
-    $this->requestRecord = $requestRecord;
 
-    if(is_null($this->requestRecord))
+    parent::__construct();
+
+    $this->record = $record;
+    $this->model = new Placid_RequestsModel;
+
+    if(is_null($this->record))
     {
-      $this->requestRecord = Placid_RequestsRecord::model();
+      $this->record = Placid_RequestsRecord::model();
     }
-      // Get the plugin
-    $plugin = craft()->plugins->getPlugin('placid');
 
       // Get the plugin settings
-    $this->placid_settings = $plugin->getSettings();
+    $this->placid_settings = $this->settings;
   }
 
 
@@ -139,10 +141,8 @@ class Placid_RequestsService extends BaseApplicationComponent
 
   public function getAllRequests()
   {
-    // Find all the requests and order them by ID
-    // -----------------------------------------------------------------------------
     $args = array('order' => 't.id');
-    $records = $this->requestRecord->findAll($args);
+    $records = $this->record->findAll($args);
     return Placid_RequestsModel::populateModels($records, 'id');
   }
 
@@ -150,7 +150,7 @@ class Placid_RequestsService extends BaseApplicationComponent
   * Find request by ID
   *
   * @param string $id 
-  *
+  * @deprecated Deprecated in 1.3. Use {@link AppBehavior::getBuild() craft()->placid_requests->getById()} instead. All these sort of methods are being combined for a more streamlined, DRY API.
   * @return request model object
   */
   public function findRequestById($id)
@@ -159,7 +159,7 @@ class Placid_RequestsService extends BaseApplicationComponent
    // Determine if there is a request record and return it
    // -----------------------------------------------------------------------------
 
-   if($record = $this->requestRecord->findByPk($id))
+   if($record = $this->record->findByPk($id))
    {
      $params = $record->getAttribute('params');
      $decodedParams = unserialize(base64_decode($params));
@@ -187,7 +187,7 @@ class Placid_RequestsService extends BaseApplicationComponent
     // Get the request record by its handle
     // ---------------------------------------------
 
-    $record =  $this->requestRecord->find(
+    $record =  $this->record->find(
       'handle=:handle',
       array(
         ':handle' => $handle
@@ -224,7 +224,7 @@ class Placid_RequestsService extends BaseApplicationComponent
     $query = $request->getQuery();
 
     // Get the parameters from the record
-    $cpQuery = unserialize(base64_decode($record->getAttribute('params')));
+    $cpQuery = json_decode($record->getAttribute('params'));
     
     // If they exist, add them to the query
     if($cpQuery)
@@ -313,7 +313,6 @@ class Placid_RequestsService extends BaseApplicationComponent
     $provider = craft()->oauth->getProvider($auth);
     $tokenModel = $this->getToken($auth);
     
-    
     if(!$tokenModel)
     {
       return null;
@@ -348,11 +347,11 @@ class Placid_RequestsService extends BaseApplicationComponent
 
     if($id = $model->getAttribute('id')) 
     {
-      $record = $this->requestRecord->findByPk($id);
+      $record = $this->record->findByPk($id);
     } 
     else 
     {
-      $record = $this->requestRecord->create();
+      $record = $this->record->create();
     }
 
     // Get the attributes from the passed model
@@ -419,7 +418,7 @@ class Placid_RequestsService extends BaseApplicationComponent
    */
   public function deleteRecordById($id)
   {
-    return $this->requestRecord->deleteByPk($id);
+    return $this->record->deleteByPk($id);
   }
 
   // Dukt OAuth Methods

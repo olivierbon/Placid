@@ -27,12 +27,15 @@ class PlacidPlugin extends BasePlugin
   public function registerCpRoutes()
     {
         return array(
-            'placid/edit/request/(?P<requestId>\d+)' => 'placid/_edit',
-            'placid/edit/token/(?P<tokenId>\d+)' => 'placid/_editToken',
-            'placid/addToken' => 'placid/_editToken',
-            'placid/add' => 'placid/_edit',
-            'placid/oauth' => 'placid/_oauth',
-            'placid/auth' => 'placid/_auth',
+            'placid' => array('action' => 'placid/placidIndex'),
+            'placid/requests/(?P<requestId>\d+)'  => array('action' => 'placid/editRequest'),
+            'placid/requests/new'                 => array('action' => 'placid/editRequest'),
+
+            'placid/auth'                       => array('action' => 'placid/authIndex'),
+            'placid/auth/(?P<tokenId>\d+)'      => array('action' => 'placid/editAuth'),
+            'placid/auth/new'                   => array('action' => 'placid/editAuth'),
+
+            'placid/oauth'                        => array('action' => 'placid/oauthIndex'),
        );
   }
   /**

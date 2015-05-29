@@ -1,0 +1,44 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+
+{% set crumbs = [
+    { label: "Placid"|t, url: url('placid/auth') },
+    { label: token ? token.name : 'New token', url: url( token ? '/edit/token/' ~ token.id : 'add') }
+] %}
+
+{% set title = token ? token.name : "New access token"|t %}
+
+{% set content %}
+	<form method="post" action="" accept-charset="UTF-8" data-saveshortcut="1" data-saveshortcut-redirect="/admin/placid/auth/{{ token ? token.id : ''}}">
+   
+    <input type="hidden" name="action" value="placid/token/save">
+    <input type="hidden" name="redirect" value="placid/auth" />
+
+    {% if token %}
+      <input type="hidden" name="tokenId" value="{{ token.id }}" />
+    {% endif %}
+
+    {{ forms.textField({
+      label: 'Name'|t,
+      id : 'name',
+      required: true,
+      name: 'name',
+      value: token ? token.name : null,
+      errors: token ? token.errors('name') : null
+    }) }}
+
+    {{ forms.textField({
+      label: 'Token'|t,
+      id : 'token',
+      required: true,
+      name: 'token',
+      value: token ? token.encoded_token : null,
+      errors: token ? token.errors('token') : null
+    }) }}
+
+    <div class="buttons">
+      <input type="submit" class="btn submit" value="{{ 'Save'|t }}">
+    </div>
+     
+{% endset %}

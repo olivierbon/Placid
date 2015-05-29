@@ -3,15 +3,15 @@
 {% set selectedTab = 'auth' %}
 
 {% set content %}
+
 {% set settingsUrl = url('oauth/twitter') %}
 
 {% set oauth = craft.plugins.getPlugin('oauth', false) %}
 
 <div class="buttons">
-  <a href="{{ url('placid/addToken')}}" class="btn submit add icon">Add access token</a>
+  <a href="{{ url('placid/auth/new')}}" class="btn submit add icon">Add access token</a>
 </div>
 
-{% set tokens = craft.placid.getaccessTokens %}
 
 <table id="fields" class="data fullwidth collapsible">
   <thead>
@@ -24,12 +24,12 @@
   <tbody>
     {% for token in tokens %}
     <tr data-id="{{ token.id }}" data-name="{{ token.name }}">
-      <td><a href="{{ url("placid/edit/token/" ~ token.id) }}">{{ token.name }}</a></td>
+      <td><a href="{{ url("placid/auth/" ~ token.id) }}">{{ token.name }}</a></td>
       <td>
         {% if user.admin %}
           {{ token.encoded_token }}
         {% else %}
-          <small>Only admins can see access tokens</small>
+          <span class="disabled">Hidden</small>
         {% endif %}
       </td>
       <td><a class="delete icon" title="{{ 'Delete'|t }}"></a></td> 

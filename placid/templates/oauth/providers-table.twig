@@ -1,0 +1,36 @@
+<table id="fields" class="data fullwidth collapsible">
+	<thead>
+		<tr>
+			<th scope="col">{{ "Name"|t }}</th>
+			<th scope="col">{{ "Status"|t }}</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for provider in providers %}
+			<tr>
+				{% set token = craft.placid.getOAuthToken(provider.name) %}
+				
+        		{# Set the action url for connecting to provider #}
+        		{% set connectUrl = actionUrl('placid/requests/connect', { provider : provider.handle }) %}
+        		{# set the disconnect action url for the provider #}
+        		{% set disconnectUrl = actionUrl('placid/requests/disconnect', {provider : provider.handle }) %}
+				<td>{{ provider.name }}</td>
+				<td>
+			  	{% if token %}
+			   	 <span class="status on"></span> {{ "Connected"|t }}
+			  	{% else %}
+			    	<span class="status"></span><span class="light">{{ "Not connected"|t }}</span>
+			  	{% endif %}
+				</td>
+				<td>
+		  			{% if token %}
+		    			<a class="btn small" href="{{ disconnectUrl }}">{{ 'Disconnect'|t }}</a>
+		  			{% else %}
+		    			<a class="btn small" href="{{ connectUrl }}">{{"Connect to {provider}"|t({provider: provider.name})}}</a>
+		  			{% endif %}
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>

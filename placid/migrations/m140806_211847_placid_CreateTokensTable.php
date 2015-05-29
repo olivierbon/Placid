@@ -15,7 +15,7 @@ class m140806_211847_placid_CreateTokensTable extends BaseMigration
 	{
 		$tokensTable = $this->dbConnection->schema->getTable('placid_accesstokens');
 
-		if(! $tokensTable) {
+		if(!$tokensTable) {
 			// Create the craft_placid_accesstokens table
 			craft()->db->createCommand()->createTable('placid_accesstokens', array(
 				'name'          => array('required' => true),

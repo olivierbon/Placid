@@ -28,6 +28,10 @@ class Placid_RequestsController extends BaseController
       // Get the params from the form
       $params = craft()->request->getPost('params');
 
+      if($params)
+      {
+        $params = json_encode($params);
+      }
       // Prepare the params for entry
       // -----------------------------------------------------------------------------
 
@@ -38,7 +42,7 @@ class Placid_RequestsController extends BaseController
         'oauth' => craft()->request->getPost('oauth'),
         'tokenId' => craft()->request->getPost('tokenId'),
         'url' => craft()->request->getPost('requestUrl'),
-        'params' => json_encode($params),
+        'params' => $params,
       );
 
       // Set these new attributes in the model
@@ -93,9 +97,18 @@ class Placid_RequestsController extends BaseController
      */
     public function actionConnect($provider, array $variables = array())
     {
+      // Referer
+      $referer = craft()->httpSession->get($provider.'.referer');
+
+      if(!$referer)
+      {
+        $referer = craft()->request->getUrlReferrer();
+        craft()->httpSession->add($provider.'.referer', $referer);
+      }
+
       if($response = craft()->oauth->connect(array(
         'plugin' => 'placid',
-        'provider' => $provider
+        'provider' => $provider,
       )))
       {
         if($response['success'])
@@ -104,17 +117,19 @@ class Placid_RequestsController extends BaseController
           $token = $response['token'];
 
           // save token
-          craft()->placid_requests->saveToken($token, $provider);
+          craft()->placid_oAuth->saveToken($provider, $token);
 
           // session notice
-          craft()->userSession->setNotice(Craft::t("Connected"));
+          craft()->userSession->setNotice(Craft::t("Connected to {$provider}"));
         }
         else
         {
           craft()->userSession->setError(Craft::t($response['errorMsg']));
         }
         
-        $this->redirect($response['redirect']);
+        craft()->httpSession->remove('twitter.referer');
+
+        $this->redirect('placid/oauth');
       }
     }
 
@@ -123,11 +138,14 @@ class Placid_RequestsController extends BaseController
      */
     public function actionDisconnect($provider)
     {
-        // reset token
-        craft()->placid_requests->saveToken(null, $provider);
-
-        // set notice
-        craft()->userSession->setNotice(Craft::t("Disconnected"));
+        if(craft()->placid_oAuth->deleteToken($provider))
+        {
+            craft()->userSession->setNotice(Craft::t("Disconnected from {$provider}."));
+        }
+        else
+        {
+            craft()->userSession->setNotice(Craft::t("Couldn’t disconnect from {$provider}."));
+        }
 
         // redirect
         $redirect = craft()->request->getUrlReferrer();

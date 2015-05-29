@@ -1,0 +1,27 @@
+{% extends "placid/_layout" %}
+
+{# Variables
+  ----------------------------------------------- #}
+{% set selectedTab = 'oauth' %}
+{% set settingsUrl = url('oauth/twitter') %}
+{% set oauth = craft.plugins.getPlugin('oauth', false) %}
+
+{% set content %}
+
+  {% if oauthPlugin %}
+    {% if not oauthPlugin.isInstalled %}
+       <p>{{'Placid requires OAuth plugin for authentication.'|t}}</p>
+      <div class="buttons">
+        <a class="btn" target="_blank" href="https://dukt.net/craft/oauth/">Download OAuth plugin</a>
+      </div>
+    {% elseif not oauthPlugin.isEnabled %}
+      You need to enable the OAuth Plugin
+    {% else %}     
+        {% include 'placid/oauth/providers-table' %}
+    {% endif %}
+  {% endif %}
+
+
+   
+
+{% endset %}

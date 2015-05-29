@@ -87,7 +87,19 @@ class PlacidController extends BaseController
 	
 	public function actionOAuthIndex(array $variables = array())
 	{
-		$this->renderTemplate('placid/_oauth', $variables);
+		// Get the OAuth Plugin
+		$variables['oauthPlugin'] = craft()->plugins->getPlugin('oauth');
+
+		// By default, no providers are set
+		$variables['providers'] = null;
+
+		// If we have the plugin and it's installed and enabled, get some providers!
+		if($variables['oauthPlugin'] && $variables['oauthPlugin']->isInstalled && $variables['oauthPlugin']->isEnabled)
+		{
+			$variables['providers'] = craft()->oauth->getProviders();
+		}
+
+		$this->renderTemplate('placid/oauth/index', $variables);
 	}
 
 	// Private methods
@@ -99,18 +111,18 @@ class PlacidController extends BaseController
 	 */
 	private function _getProviders()
 	{
-		$oauthPlugin = craft()->plugins->getPlugin('oauth');
+		$providers = craft()->placid_oAuth->getAll();
 
-		// if($oauthPlugin)
-		// {
-		// 	$values = array();
-		// 	$providers = craft()->oauth->getProviders();
-		// 	$values[null] = 'None';
-		// 	foreach($providers as $key => $value) {
-	 //            $values[$key] = $value['name'];
-	 //        }
-	 //        return $values;
-		// }
+		
+		if($providers)
+		{
+			$values = array();
+			$values[null] = 'None';
+			foreach($providers as $key => $value) {
+	            $values[$value['handle']] = ucfirst($value['handle']);
+	        }
+	        return $values;
+		}
 		
   //       return null;
 	}

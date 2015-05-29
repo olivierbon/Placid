@@ -30,8 +30,7 @@ class Placid_RequestsService extends PlacidService
     {
       $this->record = Placid_RequestsRecord::model();
     }
-
-      // Get the plugin settings
+    // Get the plugin settings
     $this->placid_settings = $this->settings;
   }
 
@@ -311,22 +310,14 @@ class Placid_RequestsService extends PlacidService
   {
 
     $provider = craft()->oauth->getProvider($auth);
-    $tokenModel = $this->getToken($auth);
+    $token = craft()->placid_oAuth->getToken($auth);
     
-    if(!$tokenModel)
-    {
-      return null;
-    }
+    $provider->setToken($token);
 
-    $token = $tokenModel->token;
+    $subscriber = $provider->getSubscriber();
 
-    $oauth = new \Guzzle\Plugin\Oauth\OauthPlugin(array(
-      'consumer_key'    => $provider->clientId,
-      'consumer_secret' => $provider->clientSecret,
-      'token'           => $token->getAccessToken(),
-      'token_secret'    => $token->getAccessTokenSecret()
-      ));
-    return $client->addSubscriber($oauth);
+    $client->addSubscriber($subscriber);
+
   }
 
   // Record Methods

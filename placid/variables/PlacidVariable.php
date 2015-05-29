@@ -18,6 +18,10 @@ class PlacidVariable
     {
         return craft()->placid_requests->getOptions($options)->request($handle);
     }
+    public function getOauthToken($provider)
+    {
+        return craft()->placid_oAuth->findByHandle($provider);
+    }
     public function token($provider) {
         return craft()->placid_requests->getToken($provider);
     }

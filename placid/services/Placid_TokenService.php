@@ -123,10 +123,4 @@ class Placid_TokenService extends PlacidService
         return $this->record->deleteByPk($id);
     }
 
-    // public function encrypt($token)
-    // {
-    //   return craft()->security->hashPassword($token);
-    // }
-
-   
 }

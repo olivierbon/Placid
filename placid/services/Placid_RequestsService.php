@@ -263,7 +263,6 @@ class Placid_RequestsService extends PlacidService
       $tokenModel = craft()->placid_token->findTokenById($tokenId);
       $request->setHeader('Authorization', 'Bearer ' . $tokenModel->encoded_token);
     }
-    $this->poop($request);
 
     return $request;
   }

@@ -1,0 +1,24 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+	label : "Colspan" | t,
+	name : 'colspan',
+	instructions : 'Change this if you need the widget to span more columns',
+	value : settings.colspan ?: 1
+})}}
+
+{{ forms.selectField({
+    label: "Request" | t,
+    name: 'request',
+    instructions: 'Which request do you want to show?',
+    options: requests,
+    value : (settings.request ?: null),
+}) }}
+
+{{ forms.selectField({
+    label: "Template" | t,
+    name: 'template',
+    instructions: 'Which template should be loaded',
+    options: templates,
+    value : (settings.template ?: null),
+}) }}

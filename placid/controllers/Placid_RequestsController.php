@@ -61,6 +61,7 @@ class Placid_RequestsController extends BaseController
       // Try and save the request, otherwise show an error
       // -----------------------------------------------------------------------------
 
+      
       if(craft()->placid_requests->saveRequest($model))
       {
         craft()->userSession->setNotice(Craft::t('Request saved'));

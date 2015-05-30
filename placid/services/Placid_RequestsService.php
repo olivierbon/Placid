@@ -255,6 +255,7 @@ class Placid_RequestsService extends PlacidService
         $query->set($key, $value);
       }
     }
+
     if($provider = $record->getAttribute('oauth'))
     {
       $this->_authenticate($request,$provider);

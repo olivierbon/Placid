@@ -209,6 +209,8 @@ class Placid_RequestsService extends PlacidService
   */
   private function _createRequest($client, $record)
   {
+
+    
     $request = $client->createRequest($this->config['method'], $record->getAttribute('url'));
 
     if(array_key_exists('path', $this->config))
@@ -222,14 +224,14 @@ class Placid_RequestsService extends PlacidService
     {
       foreach($cpHeaders as $k => $q)
       {
-        $request->setHeader($q['key'], $q['value']);
+        $request->addHeader($q['key'], $q['value']);
       }
     }
     elseif(array_key_exists('headers', $this->config) && is_array($this->config['headers']))
     {
       foreach ($this->config['headers'] as $key => $value)
       {
-        $request->setHeader($key, $value);
+        $request->addHeader($key, $value);
       }
     }
 
@@ -261,7 +263,7 @@ class Placid_RequestsService extends PlacidService
     if($tokenId = $record->getAttribute('tokenId'))
     {
       $tokenModel = craft()->placid_token->findTokenById($tokenId);
-      $request->setHeader('Authorization', 'Bearer ' . $tokenModel->encoded_token);
+      $request->addHeader('Authorization', 'Bearer ' . $tokenModel->encoded_token);
     }
 
     return $request;

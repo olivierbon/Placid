@@ -32,6 +32,15 @@ class Placid_RequestsController extends BaseController
       {
         $params = json_encode($params);
       }
+
+      // Get the headers
+      $headers = craft()->request->getPost('headers');
+
+      if($headers)
+      {
+        $headers = json_encode($headers);
+      }
+
       // Prepare the params for entry
       // -----------------------------------------------------------------------------
 
@@ -43,6 +52,7 @@ class Placid_RequestsController extends BaseController
         'tokenId' => craft()->request->getPost('tokenId'),
         'url' => craft()->request->getPost('requestUrl'),
         'params' => $params,
+        'headers' => $headers,
       );
 
       // Set these new attributes in the model

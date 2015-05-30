@@ -1,8 +1,6 @@
 <?php
 namespace Craft;
 
-
-
 class PlacidVariable
 {
 
@@ -14,9 +12,9 @@ class PlacidVariable
     {
         return $this->request($handle, $options);
     }
-    public function request($handle, $options = array())
+    public function request($handle, $config = array())
     {
-        return craft()->placid_requests->getOptions($options)->request($handle);
+        return craft()->placid_requests->request($handle, $config);
     }
     public function getOauthToken($provider)
     {

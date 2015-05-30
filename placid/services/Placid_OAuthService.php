@@ -68,20 +68,28 @@ class Placid_OAuthService extends PlacidService
 	}
 	public function getToken($provider)
 	{
+		
+
 		if($this->token)
 		{
 			return $this->token;
 		}
 		else
 		{
+
 			// Get the model
 			$tokenModel = $this->findByHandle($provider);
+
+
 			$tokenId = null;
 			if($tokenModel)
 			{
 				$tokenId = $tokenModel->id;
 			}
+			// $this->poop($tokenId);
 			$token = craft()->oauth->getTokenById($tokenId);
+
+
 			if($token)
 			{
 				$this->token = $token;

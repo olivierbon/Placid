@@ -107,8 +107,6 @@ class Placid_TokenService extends PlacidService
     {
      if($record = $this->tokenRecord->findByPk($id))
      {
-        $token = craft()->security->validateData($record->getAttribute('encoded_token'));
-        $record->setAttribute('encoded_token', $token);
         return Placid_TokenModel::populateModel($record);
      }
     }

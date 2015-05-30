@@ -33,4 +33,11 @@ class PlacidService extends BaseApplicationComponent
 		}
 		return null;
 	}
+	
+	public function poop($nugget)
+	{
+		echo "<pre>";
+		print_r($nugget);
+		die();
+	}
 }

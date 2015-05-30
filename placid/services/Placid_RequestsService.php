@@ -9,14 +9,17 @@ use Guzzle\Http\Exception\RequestException;
 class Placid_RequestsService extends PlacidService
 {
 
-  protected $requestRecord;
+  /**
+   * Placid plugin settings
+   * @var Array
+   */
   protected $placid_settings;
-  protected $segments;
-  protected $cache;
-  protected $cacheLength;
-  protected $method;
-  protected $query;
-  private $token;
+
+  /**
+   * Placid request config
+   * @var Array
+   */
+  protected $config;
 
   public function __construct($record = null)
   {
@@ -34,24 +37,6 @@ class Placid_RequestsService extends PlacidService
     $this->placid_settings = $this->settings;
   }
 
-
-  public function getOptions($options = array())
-  {
-    $this->segments = $this->_setOption($options, 'segments');
-    $this->method = $this->_setOption($options, 'method', 'GET');
-    $this->cacheLength = $this->_setOption($options, 'duration');
-    $this->query =  $this->_setOption($options, 'query');
-    $this->query = $this->_setOption($options, 'params', $this->query); // This needs to be deprecated
-    $this->cache = $this->_setOption($options, 'cache', $this->placid_settings['cache']);
-
-    return $this;
-  }
-
-  public function _setOption($options, $key, $default = null)
-  {
-    $option = (array_key_exists($key, $options) ? $options[$key] : $default);
-    return $option;
-  }
   /**
   * Make the request
   *
@@ -62,18 +47,31 @@ class Placid_RequestsService extends PlacidService
   * @return array   the req
   */
 
-  public function request($handle)
+  public function request($handle, array $config = array())
   {
+
+    $this->config = array_merge(
+      array(
+        'method' => 'GET',
+        'cache' => $this->placid_settings['cache'],
+        'duration' => 3600, // 1 hour
+      ),
+      $config
+    );
+
+    // Handle any changes to api gracefully
+    $this->_swapDeprecatedConfig('path', 'segments');
+    $this->_swapDeprecatedConfig('query', 'params');
 
     $client = new Client();
 
     $record = $this->findRequestByHandle($handle);
-    
+
     // Get a cached request
 
     $request = $this->_createRequest($client, $record);
-    $cachedRequest = craft()->placid_cache->get(base64_encode( urlencode( $request->getUrl() ) ));
 
+    $cachedRequest = craft()->placid_cache->get(base64_encode( urlencode( $request->getUrl() ) ));
 
     Craft::import('plugins.placid.events.PlacidBeforeRequestEvent');
 
@@ -83,10 +81,8 @@ class Placid_RequestsService extends PlacidService
 
     if($event->makeRequest)
     {
-
-      if( (! $this->cache || ! $cachedRequest) && ! $event->bypassCache)
+      if( (! $this->config['cache'] || ! $cachedRequest) && ! $event->bypassCache)
       {
-
         $response = $this->_getResponse($client, $request);
       }
       else
@@ -213,17 +209,34 @@ class Placid_RequestsService extends PlacidService
   */
   private function _createRequest($client, $record)
   {
-    $request = $client->createRequest($this->method, $record->getAttribute('url'));
+    $request = $client->createRequest($this->config['method'], $record->getAttribute('url'));
 
-    if($this->segments)
+    if(array_key_exists('path', $this->config))
     {
-      $request->setPath($this->segments);
+      $request->setPath($this->config['path']);
+    }
+
+    $cpHeaders = $record->getAttribute('headers');
+
+    if($cpHeaders)
+    {
+      foreach($cpHeaders as $k => $q)
+      {
+        $request->setHeader($q['key'], $q['value']);
+      }
+    }
+    elseif(array_key_exists('headers', $this->config) && is_array($this->config['headers']))
+    {
+      foreach ($this->config['headers'] as $key => $value)
+      {
+        $request->setHeader($key, $value);
+      }
     }
 
     $query = $request->getQuery();
 
     // Get the parameters from the record
-    $cpQuery = json_decode($record->getAttribute('params'));
+    $cpQuery = $record->getAttribute('params');
     
     // If they exist, add them to the query
     if($cpQuery)
@@ -233,14 +246,13 @@ class Placid_RequestsService extends PlacidService
         $query->set($q['key'], $q['value']);
       }
     } 
-    elseif($this->query)
+    elseif(array_key_exists('query', $this->config))
     {
-      foreach($this->query as $key => $value)
+      foreach($this->config['query'] as $key => $value)
       {
         $query->set($key, $value);
       }
     }
-
     if($provider = $record->getAttribute('oauth'))
     {
       $this->_authenticate($request,$provider);
@@ -249,11 +261,10 @@ class Placid_RequestsService extends PlacidService
     if($tokenId = $record->getAttribute('tokenId'))
     {
       $tokenModel = craft()->placid_token->findTokenById($tokenId);
-      $token = $tokenModel->getAttribute('encoded_token');
-      $query->set('access_token', $token);
+      $request->setHeader('Authorization', 'Bearer ' . $tokenModel->encoded_token);
     }
+    $this->poop($request);
 
-    
     return $request;
   }
 
@@ -291,9 +302,9 @@ class Placid_RequestsService extends PlacidService
       
     }
 
-    if($this->cache)
+    if($this->config['cache'])
     {
-      craft()->placid_cache->set($request->getUrl(), $response->json(), $this->cacheLength);
+      craft()->placid_cache->set($request->getUrl(), $response->json(), $this->config['duration']);
     }
 
     return $response->json();
@@ -308,16 +319,28 @@ class Placid_RequestsService extends PlacidService
 
   private function _authenticate($client, $auth)
   {
-
     $provider = craft()->oauth->getProvider($auth);
     $token = craft()->placid_oAuth->getToken($auth);
-    
-    $provider->setToken($token);
-
+    $provider->setToken($token);  
     $subscriber = $provider->getSubscriber();
-
     $client->addSubscriber($subscriber);
+  }
 
+  private function _swapDeprecatedConfig($new, $old)
+  {
+    // Segments is now called path, allow for templates still using segments
+    if(array_key_exists($old, $this->config))
+    {
+      $this->config[$new] = $this->config[$old];
+      unset($this->config[$old]);
+    }
+    return true;
+  }
+  public function poop($nugget)
+  {
+    echo "<pre>";
+    print_r($nugget);
+    die();
   }
 
   // Record Methods
@@ -367,41 +390,6 @@ class Placid_RequestsService extends PlacidService
   } 
 
   /**
-  * Get the token from a provider
-  *                                   
-  * @param string|null      $provider     The handle of the provider
-  *
-  * @return string   the token if the method was successful. 
-  * A null value will be returned if no token exists
-  */
-
-  public function getToken($provider = null)
-  {
-
-    if($this->token)
-    {
-      return $this->token;
-    }
-    else
-    {
-          // get settings
-      $settings = $this->placid_settings;
-
-          // get tokenId
-      $tokenId = $settings[$provider];
-
-          // get token
-      $token = craft()->oauth->getTokenById($tokenId);
-      if($token && $token->token)
-      {
-        $this->token = $token;
-        return $this->token;
-      }
-
-      return null;
-    }
-  }
-  /**
    * Delete a request from the database.
    *
    * @param  int $id
@@ -410,56 +398,6 @@ class Placid_RequestsService extends PlacidService
   public function deleteRecordById($id)
   {
     return $this->record->deleteByPk($id);
-  }
-
-  // Dukt OAuth Methods
-  // =============================================================================
-
-  /**
-   * Save the token
-   *                                   
-   * @param string          $token  The token which needs to be saved
-   *
-   * @param string|null     $provider The provider handle    
-   *
-   * @return boolean        true if token is saved
-   *          
-   */
-
-  public function saveToken($token, $provider = null)
-  {
-      // get plugin
-    $plugin = craft()->plugins->getPlugin('placid');
-
-      // get settings
-    $settings = $this->placid_settings;
-
-      // get tokenId
-    $tokenId = $settings[$provider];
-
-      // get token
-    $model = craft()->oauth->getTokenById($tokenId);
-
-      // populate token model
-    if(!$model)
-    {
-      $model = new Oauth_TokenModel;
-    }
-
-    $model->providerHandle = $provider;
-    $model->pluginHandle = 'placid';
-    $model->encodedToken = craft()->oauth->encodeToken($token);
-
-      // save token
-    craft()->oauth->saveToken($model);
-
-      // set token ID
-    $settings[$provider] = $model->id;
-
-      // save plugin settings
-    craft()->plugins->savePluginSettings($plugin, $settings);
-
-    return true;
   }
 
   // Events

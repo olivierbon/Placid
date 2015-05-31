@@ -1,5 +1,16 @@
 <?php
-
+/**
+ * The main Placid class
+ *
+ * This class will take care of all repetitive tasks that are required.
+ *
+ * @author    Alec Ritson. <info@alecritson.co.uk>
+ * @copyright Copyright (c) 2014, Alec Ritson.
+ * @license   http://buildwithcraft.com/license Craft License Agreement
+ * @link      http://buildwithcraft.com
+ * @package   craft.plugins.placid.services
+ * @since     1.3.0
+ */
 namespace Craft;
 
 class PlacidService extends BaseApplicationComponent
@@ -13,6 +24,10 @@ class PlacidService extends BaseApplicationComponent
 		$this->settings = craft()->plugins->getPlugin('placid')->getSettings();
 	}
 
+	/**
+	 * Gets all the records for the given record type
+	 * @return Array An array of Model objects
+	 */
 	public function getAll()
 	{
 		$args = array('order' => 't.id');
@@ -23,7 +38,7 @@ class PlacidService extends BaseApplicationComponent
 	/**
 	 * Gets a record by its id
 	 * @param  Int $id The id of the record
-	 * @return Placid_RequestsModel     A model representation of the record
+	 * @return  A model representation of the record
 	 */
 	public function getById($id)
 	{

@@ -1,5 +1,17 @@
 <?php
-
+/**
+ * Placid requests service class
+ *
+ * This class does most of the heavy lifting when it comes to making requests, authenticating
+ * and putting in querys, paths all that config stuff.
+ *
+ * @author    Alec Ritson. <info@alecritson.co.uk>
+ * @copyright Copyright (c) 2014, Alec Ritson.
+ * @license   http://buildwithcraft.com/license Craft License Agreement
+ * @link      http://itsalec.co.uk
+ * @package   craft.plugins.placid.services
+ * @since     0.8.0
+ */
 namespace Craft;
 
 use Guzzle\Http\Client;
@@ -8,7 +20,6 @@ use Guzzle\Http\Exception\RequestException;
 
 class Placid_RequestsService extends PlacidService
 {
-
   /**
    * Placid plugin settings
    * @var Array
@@ -63,22 +74,21 @@ class Placid_RequestsService extends PlacidService
     $this->_swapDeprecatedConfig('path', 'segments');
     $this->_swapDeprecatedConfig('query', 'params');
 
+    // Create a new guzzle client
     $client = new Client();
 
     $record = $this->findRequestByHandle($handle);
 
     // Get a cached request
-
     $request = $this->_createRequest($client, $record);
+    $cachedRequest = craft()->placid_cache->get(base64_encode(urlencode($request->getUrl())));
 
-    $cachedRequest = craft()->placid_cache->get(base64_encode( urlencode( $request->getUrl() ) ));
-
+    // Import the onBeforeRequest event
     Craft::import('plugins.placid.events.PlacidBeforeRequestEvent');
-
     $event = new PlacidBeforeRequestEvent($this, array('request' => $request));
-
     craft()->placid_requests->onBeforeRequest($event);
 
+    // Check to make sure no other plugins have change anything
     if($event->makeRequest)
     {
       if( (! $this->config['cache'] || ! $cachedRequest) && ! $event->bypassCache)
@@ -112,7 +122,6 @@ class Placid_RequestsService extends PlacidService
   * @return model    returns Placid_RequestsModel object
   *          
   */
-
   public function newRequest($attributes = array())
   {
 
@@ -127,9 +136,10 @@ class Placid_RequestsService extends PlacidService
     return $model;
   }
 
-
   /**
    * Get all placid requests
+   * 
+   * @deprecated Deprecated in 1.3. Use {@link AppBehavior::getBuild() craft()->placid_requests->getAll()} instead. All these sort of methods are being combined for a more streamlined, DRY API.
    *
    * @return requests model object 
    */
@@ -144,8 +154,10 @@ class Placid_RequestsService extends PlacidService
   /**
   * Find request by ID
   *
-  * @param string $id 
+  * @param string $id
+  * 
   * @deprecated Deprecated in 1.3. Use {@link AppBehavior::getBuild() craft()->placid_requests->getById()} instead. All these sort of methods are being combined for a more streamlined, DRY API.
+  *
   * @return request model object
   */
   public function findRequestById($id)
@@ -153,12 +165,8 @@ class Placid_RequestsService extends PlacidService
 
    // Determine if there is a request record and return it
    // -----------------------------------------------------------------------------
-
    if($record = $this->record->findByPk($id))
    {
-     $params = $record->getAttribute('params');
-     $decodedParams = unserialize(base64_decode($params));
-     $record->setAttribute('params', $decodedParams);
      return Placid_RequestsModel::populateModel($record);
    }
  }
@@ -199,6 +207,32 @@ class Placid_RequestsService extends PlacidService
     }
   }
 
+  // Events
+  // =============================================================================
+
+  /**
+  * Fires an 'onBeforeRequest' event.
+  *
+  * @param PlacidBeforeRequestEvent $event
+  */
+  public function onBeforeRequest(PlacidBeforeRequestEvent $event)
+  {
+    $this->raiseEvent('onBeforeRequest', $event);
+  }
+
+  /**
+  * Fires an 'onAfterRequest' event.
+  *
+  * @param PlacidAfterRequestEvent $event
+  */
+  public function onAfterRequest(PlacidAfterRequestEvent $event)
+  {
+    $this->raiseEvent('onAfterRequest', $event);
+  }
+  
+  // Private Methods
+  // =============================================================================
+  
   /**
   * Create a new request object
   *                                   
@@ -209,15 +243,16 @@ class Placid_RequestsService extends PlacidService
   */
   private function _createRequest($client, $record)
   {
-
-    
     $request = $client->createRequest($this->config['method'], $record->getAttribute('url'));
 
+    // Is a new path set?
     if(array_key_exists('path', $this->config))
     {
       $request->setPath($this->config['path']);
     }
 
+    // Have headers been set in the admin area?
+    // If so add them in otherwise check if there are any passed through the template
     $cpHeaders = $record->getAttribute('headers');
 
     if($cpHeaders)
@@ -235,6 +270,7 @@ class Placid_RequestsService extends PlacidService
       }
     }
 
+    // Get the query from the request
     $query = $request->getQuery();
 
     // Get the parameters from the record
@@ -256,11 +292,13 @@ class Placid_RequestsService extends PlacidService
       }
     }
 
+    // Do we need to do some OAuth magic?
     if($provider = $record->getAttribute('oauth'))
     {
       $this->_authenticate($request,$provider);
     }
 
+    // Has the request got an access token we need to attach?
     if($tokenId = $record->getAttribute('tokenId'))
     {
       $tokenModel = craft()->placid_token->findTokenById($tokenId);
@@ -277,7 +315,6 @@ class Placid_RequestsService extends PlacidService
    * @param object $request a guzzle request object
    * @return array the response
    */
-
   private function _getResponse(Client $client, $request)
   {
     try {
@@ -301,7 +338,6 @@ class Placid_RequestsService extends PlacidService
       else {
         return false;
       }
-      
     }
 
     if($this->config['cache'])
@@ -328,6 +364,15 @@ class Placid_RequestsService extends PlacidService
     $client->addSubscriber($subscriber);
   }
 
+  /**
+   * If there have been any config naming changes, this function will handle it
+   * gracefully so templates don't start failing everywhere because I change my
+   * mind too much!
+   *   
+   * @param  String $new The new config key
+   * @param  String $old The old config key to be replaced
+   * @return Bool     Whether it was a success
+   */
   private function _swapDeprecatedConfig($new, $old)
   {
     // Segments is now called path, allow for templates still using segments
@@ -338,91 +383,4 @@ class Placid_RequestsService extends PlacidService
     }
     return true;
   }
-  public function poop($nugget)
-  {
-    echo "<pre>";
-    print_r($nugget);
-    die();
-  }
-
-  // Record Methods
-  // =============================================================================
-
-  /**
-   * Save a request
-   *
-   * @param object RequestsModel object
-   *
-   * @return bool true or false if request has been saved
-   */
-
-  public function saveRequest(Placid_RequestsModel &$model)
-  {
-    // Determine whether this is an existing request or if we need to create a new one
-    // --------------------------------------------------------------------------------
-
-    if($id = $model->getAttribute('id')) 
-    {
-      $record = $this->record->findByPk($id);
-    } 
-    else 
-    {
-      $record = $this->record->create();
-    }
-
-    // Get the attributes from the passed model
-    $attributes = $model->getAttributes();
-
-    // Set the new attributes to the record
-    $record->setAttributes($attributes, false);
-
-    // Save the new request
-    // -----------------------------------------------------------------------------
-
-    if($record->save())
-    {
-      $model->setAttribute('id', $record->getAttribute('id'));
-      return true;
-    } 
-    else 
-    {
-      $model->addErrors($record->getErrors());
-      return false;
-    }
-  } 
-
-  /**
-   * Delete a request from the database.
-   *
-   * @param  int $id
-   * @return int The number of rows affected
-   */
-  public function deleteRecordById($id)
-  {
-    return $this->record->deleteByPk($id);
-  }
-
-  // Events
-  // =============================================================================
-
-  /**
-  * Fires an 'onBeforeRequest' event.
-  *
-  * @param PlacidBeforeRequestEvent $event
-  */
-  public function onBeforeRequest(PlacidBeforeRequestEvent $event)
-  {
-    $this->raiseEvent('onBeforeRequest', $event);
-  }
-
-  /**
-  * Fires an 'onAfterRequest' event.
-  *
-  * @param PlacidAfterRequestEvent $event
-  */
-  public function onAfterRequest(PlacidAfterRequestEvent $event)
-  {
-    $this->raiseEvent('onAfterRequest', $event);
-  }
-
 }

@@ -27,13 +27,13 @@ class PlacidPlugin extends BasePlugin
   public function registerCpRoutes()
     {
         return array(
-            'placid' => array('action' => 'placid/placidIndex'),
+            'placid'                              => array('action' => 'placid/placidIndex'),
             'placid/requests/(?P<requestId>\d+)'  => array('action' => 'placid/editRequest'),
             'placid/requests/new'                 => array('action' => 'placid/editRequest'),
 
-            'placid/auth'                       => array('action' => 'placid/authIndex'),
-            'placid/auth/(?P<tokenId>\d+)'      => array('action' => 'placid/editAuth'),
-            'placid/auth/new'                   => array('action' => 'placid/editAuth'),
+            'placid/auth'                         => array('action' => 'placid/authIndex'),
+            'placid/auth/(?P<tokenId>\d+)'        => array('action' => 'placid/editAuth'),
+            'placid/auth/new'                     => array('action' => 'placid/editAuth'),
 
             'placid/oauth'                        => array('action' => 'placid/oauthIndex'),
        );
@@ -47,9 +47,6 @@ class PlacidPlugin extends BasePlugin
   protected function defineSettings()
   {
       return array(
-          'twitter' => array(AttributeType::Number),
-          'github' => array(AttributeType::Number),
-          'instagram' => array(AttributeType::Number),
           'cache' => array(AttributeType::Bool, 'default' => true),
       );
   }

@@ -1,5 +1,16 @@
 <?php
-
+/**
+ * Placid Cache class
+ *
+ * Handles caching of requests and ting
+ *
+ * @author    Alec Ritson. <info@alecritson.co.uk>
+ * @copyright Copyright (c) 2015, Alec Ritson.
+ * @license   http://buildwithcraft.com/license Craft License Agreement
+ * @link      http://itsalec.co.uk
+ * @package   craft.plugins.placid.services
+ * @since     1.0.0
+ */
 namespace Craft;
 
 class Placid_CacheService extends BaseApplicationComponent

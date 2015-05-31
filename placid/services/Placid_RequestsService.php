@@ -241,9 +241,15 @@ class Placid_RequestsService extends PlacidService
   * @return object    returns EntityEnclosingRequest $request
   *          
   */
-  private function _createRequest($client, $record)
+  private function _createRequest($client, $record = null)
   {
-    $request = $client->createRequest($this->config['method'], $record->getAttribute('url'));
+
+    if($record && $recordUrl = $record->getAttribute('url'))
+    {
+      $this->config['url'] = $recordUrl;
+    }
+
+    $request = $client->createRequest($this->config['method'], $this->config['url']);
 
     // Is a new path set?
     if(array_key_exists('path', $this->config))

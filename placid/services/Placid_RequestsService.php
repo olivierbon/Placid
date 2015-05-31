@@ -58,7 +58,7 @@ class Placid_RequestsService extends PlacidService
   * @return array   the req
   */
 
-  public function request($handle, array $config = array())
+  public function request($handle = null, array $config = array())
   {
 
     $this->config = array_merge(
@@ -77,10 +77,18 @@ class Placid_RequestsService extends PlacidService
     // Create a new guzzle client
     $client = new Client();
 
-    $record = $this->findRequestByHandle($handle);
+    if(!array_key_exists('url', $this->config))
+    {
+      $record = $this->findRequestByHandle($handle);
+    }
+    else
+    {
+      $record = null;
+    }
+    
+    $request = $this->_createRequest($client, $record);
 
     // Get a cached request
-    $request = $this->_createRequest($client, $record);
     $cachedRequest = craft()->placid_cache->get(base64_encode(urlencode($request->getUrl())));
 
     // Import the onBeforeRequest event

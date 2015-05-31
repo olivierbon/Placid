@@ -3,11 +3,6 @@ namespace Craft;
 
 class PlacidVariable
 {
-
-    public function getToken($provider)
-    {
-        return craft()->placid_requests->getToken($provider);
-    }
     public function get($handle, $options = array())
     {
         return $this->request($handle, $options);

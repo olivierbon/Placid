@@ -25,7 +25,7 @@
 				</td>
 				<td>
 		  			{% if token %}
-		    			<a class="btn small" href="{{ disconnectUrl }}">{{ 'Disconnect'|t }}</a>
+		    			<a class="btn small" href="{{ disconnectUrl }}">{{ 'Disconnect from {provider}'|t }}</a>
 		  			{% else %}
 		    			<a class="btn small" href="{{ connectUrl }}">{{"Connect to {provider}"|t({provider: provider.name})}}</a>
 		  			{% endif %}

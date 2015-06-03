@@ -215,6 +215,63 @@ class Placid_RequestsService extends PlacidService
     }
   }
 
+  // Record Methods
+  // =============================================================================
+
+  /**
+   * Save a request
+   *
+   * @param object RequestsModel object
+   *
+   * @return bool true or false if request has been saved
+   */
+
+  public function saveRequest(Placid_RequestsModel &$model)
+  {
+    // Determine whether this is an existing request or if we need to create a new one
+    // --------------------------------------------------------------------------------
+
+    if($id = $model->getAttribute('id')) 
+    {
+      $record = $this->record->findByPk($id);
+    } 
+    else 
+    {
+      $record = $this->record->create();
+    }
+
+    // Get the attributes from the passed model
+    $attributes = $model->getAttributes();
+
+    // Set the new attributes to the record
+    $record->setAttributes($attributes, false);
+
+    // Save the new request
+    // -----------------------------------------------------------------------------
+
+    if($record->save())
+    {
+      $model->setAttribute('id', $record->getAttribute('id'));
+      return true;
+    } 
+    else 
+    {
+      $model->addErrors($record->getErrors());
+      return false;
+    }
+  } 
+
+  /**
+   * Delete a request from the database.
+   *
+   * @param  int $id
+   * @return int The number of rows affected
+   */
+  public function deleteRecordById($id)
+  {
+    return $this->record->deleteByPk($id);
+  }
+  
   // Events
   // =============================================================================
 

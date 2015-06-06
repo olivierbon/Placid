@@ -5,7 +5,7 @@
 
 {% set crumbs = [
     { label: "Placid"|t, url: url('placid') },
-    { label: request ? request.name : 'New request', url: url( request ? '/requests/' ~ request.id : 'add') }
+    { label: request ? request.name : 'New request', url: url( request ? 'placid/requests/' ~ request.id : 'placid/requests/new') }
 ] %}
 
 {% set content %}

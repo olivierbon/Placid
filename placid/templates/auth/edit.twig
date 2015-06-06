@@ -4,7 +4,7 @@
 
 {% set crumbs = [
     { label: "Placid"|t, url: url('placid/auth') },
-    { label: token ? token.name : 'New token', url: url( token ? '/edit/token/' ~ token.id : 'add') }
+    { label: token ? token.name : 'New token', url: url( token ? 'placid/auth/' ~ token.id : 'placid/auth/new') }
 ] %}
 
 {% set title = token ? token.name : "New access token"|t %}

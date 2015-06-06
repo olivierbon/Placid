@@ -316,6 +316,11 @@ class Placid_RequestsService extends PlacidService
 
     $request = $client->createRequest($this->config['method'], $this->config['url']);
 
+    if(array_key_exists('body', $this->config))
+    {
+      $request->setBody($this->config['body']);
+    }
+
     // Is a new path set?
     if(array_key_exists('path', $this->config))
     {

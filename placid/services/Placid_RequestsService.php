@@ -355,10 +355,13 @@ class Placid_RequestsService extends PlacidService
     // If they exist, add them to the query
     if($cpQuery && is_array($cpQuery))
     {
-      foreach($cpQuery as $k => $q)
+      if(is_array($cpQuery))
       {
-        $query->set($q['key'], $q['value']);
-      }
+        foreach($cpQuery as $k => $q)
+        {
+          $query->set($q['key'], $q['value']);
+        }
+      } 
     } 
     elseif(array_key_exists('query', $this->config))
     {

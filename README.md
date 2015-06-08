@@ -3,8 +3,11 @@ Placid is a Craft plugin which makes it easy to use REST services in your twig t
 
 **Given the announcement of Craft 3, Placid 2 will wait and during this time I will be working on bringing this version of Placid up to scratch, stay tuned!**
 
-#### `1.3.5` is released
-This now has support for the latest version of the OAuth plugin from Dukt, as of testing `0.9.71` is working. But any issues just give us a shout! [You can get the latest release here](https://github.com/alecritson/Placid/releases/tag/1.3.5)
+#### `1.3.6` is released
+
+`1.3.6` Sees some template fixes in the backend and fixes some bugs people might have encountered from upgrading  
+
+This now has support for the latest version of the OAuth plugin from Dukt, as of testing `0.9.71` is working. But any issues just give us a shout! [You can get the latest release here](https://github.com/alecritson/Placid/releases/latest)
 
 **Support for custom headers**  
 You can also now set your own headers to be sent with the request.

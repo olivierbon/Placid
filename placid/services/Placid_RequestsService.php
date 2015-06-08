@@ -353,7 +353,7 @@ class Placid_RequestsService extends PlacidService
     $cpQuery = $record->getAttribute('params');
     
     // If they exist, add them to the query
-    if($cpQuery)
+    if($cpQuery && is_array($cpQuery))
     {
       foreach($cpQuery as $k => $q)
       {

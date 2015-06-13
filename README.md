@@ -2,9 +2,9 @@
 
 Placid is a Craft plugin which makes it easy to use REST services in your twig templates, whether thats getting a twitter feed, showing off dribbble shots or getting the weather, Placid has you covered.
 
-#### `1.3.6`
+#### `1.3.8`
 
-`1.3.6` Sees some template fixes in the backend and fixes some bugs people might have encountered from upgrading  
+`1.3.8` Fixed error with leftover widget when deleting a request. Other template improvements 
 
 This now has support for the latest version of the OAuth plugin from Dukt, as of testing `0.9.71` is working. But any issues just give us a shout! [You can get the latest release here](https://github.com/alecritson/Placid/releases/latest)
 

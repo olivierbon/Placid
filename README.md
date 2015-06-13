@@ -2,9 +2,7 @@
 
 Placid is a Craft plugin which makes it easy to use REST services in your twig templates, whether thats getting a twitter feed, showing off dribbble shots or getting the weather, Placid has you covered.
 
-**Given the announcement of Craft 3, Placid 2 will wait and during this time I will be working on bringing this version of Placid up to scratch, stay tuned!**
-
-#### `1.3.6` is released
+#### `1.3.6`
 
 `1.3.6` Sees some template fixes in the backend and fixes some bugs people might have encountered from upgrading  
 

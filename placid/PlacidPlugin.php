@@ -10,7 +10,7 @@ class PlacidPlugin extends BasePlugin
   }
   function getVersion()
   {
-    return '1.3.5';
+    return '1.3.6';
   }
   function getDeveloper()
   {
@@ -47,7 +47,7 @@ class PlacidPlugin extends BasePlugin
   protected function defineSettings()
   {
       return array(
-          'cache' => array(AttributeType::Bool, 'default' => true),
+          'cache' => array(AttributeType::Bool, 'default' => true)
       );
   }
 

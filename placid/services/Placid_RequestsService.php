@@ -269,6 +269,8 @@ class Placid_RequestsService extends PlacidService
    */
   public function deleteRecordById($id)
   {
+    // Get all a users widgets
+    $this->_deleteWidgetsByRecord($id);
     return $this->record->deleteByPk($id);
   }
   
@@ -420,7 +422,6 @@ class Placid_RequestsService extends PlacidService
     {
       craft()->placid_cache->set($request->getUrl(), $response->json(), $this->config['duration']);
     }
-
     return $response->json();
   }
   /**
@@ -456,6 +457,28 @@ class Placid_RequestsService extends PlacidService
     {
       $this->config[$new] = $this->config[$old];
       unset($this->config[$old]);
+    }
+    return true;
+  }
+
+  /**
+   * Deletes a Widget based on the record
+   * @param  Int $id The id of the record
+   * @return Bool    True
+   */
+  private function _deleteWidgetsByRecord($id)
+  {
+    $this->record = $this->record->findByPk($id);
+
+    $currentWidgets = craft()->dashboard->getUserWidgets();
+
+    foreach($currentWidgets as $widget)
+    {
+      $settings = $widget->settings;
+      if(array_key_exists('request', $settings) && $settings['request'] == $this->record->handle)
+      {
+       craft()->dashboard->deleteUserWidgetById($widget->id);
+      }
     }
     return true;
   }

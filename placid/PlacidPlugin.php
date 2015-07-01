@@ -21,9 +21,14 @@ class PlacidPlugin extends BasePlugin
     return 'http://alecritson.co.uk';
   }
   public function hasCpSection()
-    {
-        return true;
-    }
+  {
+    return true;
+  }
+  public function init()
+  {
+    $path = craft()->config->parseEnvironmentString($this->getSettings()->widgetTemplatesPath);
+    // $this->poop($path);
+  }
   public function registerCpRoutes()
     {
         return array(
@@ -47,7 +52,8 @@ class PlacidPlugin extends BasePlugin
   protected function defineSettings()
   {
       return array(
-          'cache' => array(AttributeType::Bool, 'default' => true)
+          'cache' => array(AttributeType::Bool, 'default' => true),
+          'widgetTemplatesPath' => array(AttributeType::String, 'default' => '_widgets/placid')
       );
   }
 
@@ -58,21 +64,20 @@ class PlacidPlugin extends BasePlugin
        ));
    }
 
-/**
- * Remove all tokens related to this plugin when uninstalled
- */
-public function onBeforeUninstall()
-{
-    if(isset(craft()->oauth))
-    {
-        craft()->oauth->deleteTokensByPlugin('placid');
-    }
-}
+  /**
+   * Remove all tokens related to this plugin when uninstalled
+   */
+  public function onBeforeUninstall()
+  {
+      if(isset(craft()->oauth))
+      {
+          craft()->oauth->deleteTokensByPlugin('placid');
+      }
+  }
 
   public function onAfterInstall()
   {
       $exampleRequest = array('name'=> 'Dribbble shots', 'url' => 'http://api.dribbble.com/shots/everyone', 'handle' => 'dribbbleShots', 'oauth' => '', 'params' => '');
       craft()->db->createCommand()->insert('placid_requests', $exampleRequest);
   }
-
 }

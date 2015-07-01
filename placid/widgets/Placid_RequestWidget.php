@@ -25,6 +25,9 @@ class Placid_RequestWidget extends BaseWidget
     public function getBodyHtml()
     {
         $settings = $this->getSettings();
+
+        $pluginSettings = craft()->plugins->getPlugin('placid')->getSettings();
+
         $variables = array();
 
         $variables['response'] = craft()->placid_requests->request($settings->request);
@@ -32,7 +35,12 @@ class Placid_RequestWidget extends BaseWidget
         $path = craft()->path->getSiteTemplatesPath();
         craft()->path->setTemplatesPath($path);
 
-        $body = craft()->templates->render('_widgets/placid/' . $settings->template, $variables);
+        try {
+             $body = craft()->templates->render($pluginSettings->widgetTemplatesPath . $settings->template, $variables);
+        } catch (TemplateLoaderException $e) {
+            Craft::log("Unable to load template {$templatesPath}");
+            return '<span class="error">Unable to load template, check logs for details</span>';
+        }
 
         $path = craft()->path->getCpTemplatesPath();
         craft()->path->setTemplatesPath($path);
@@ -52,30 +60,9 @@ class Placid_RequestWidget extends BaseWidget
     }
     public function getSettingsHtml()
     {   
-        $templatesPath = craft()->path->getSiteTemplatesPath() . '_widgets/placid/';
+        $pluginSettings = craft()->plugins->getPlugin('placid')->getSettings();
 
-        $templates = IOHelper::getFolderContents($templatesPath, TRUE);
-
-        $templatesArray = array('' => Craft::t('No template selected'));
-
-        // Turn array into ArrayObject 
-        $templates = new \ArrayObject($templates);
-
-        // Iterate over template list
-        // * Remove full path 
-        // * Remove folders from list
-        for ($list = $templates->getIterator();
-        $list->valid(); $list->next()) 
-        { 
-            $filename = $list->current();
-            
-            $filename = str_replace($templatesPath, '', $filename);
-            $filenameIncludingSubfolder = $filename;
-            $isTemplate = preg_match("/(.html|.twig)$/u", $filename);
-            
-            if ($isTemplate) $templatesArray[$filenameIncludingSubfolder] = $filename;
-        }
-
+        // Get placid requests and send them to the widget settings
         $requests = craft()->placid_requests->getAll();
 
         $requestsArray = array('' => 'No request selected');
@@ -84,6 +71,38 @@ class Placid_RequestWidget extends BaseWidget
         {
             $requestsArray[$request->handle] = $request->name;
         }
+
+        $templatesPath = craft()->path->getSiteTemplatesPath() . $pluginSettings->widgetTemplatesPath;
+
+        $templates = IOHelper::getFolderContents($templatesPath, TRUE);
+
+        $templatesArray = array('' => Craft::t('No template selected'));
+
+        if(!$templates)
+        {
+            $templatesArray = array('' => 'Cannot find templates');
+            Craft::log('Cannot find templates in path =' . $templatesPath .'=', LogLevel::Error);
+        }
+        else
+        {
+            // Turn array into ArrayObject 
+            $templates = new \ArrayObject($templates);
+
+            // Iterate over template list
+            // * Remove full path 
+            // * Remove folders from list
+            for ($list = $templates->getIterator();
+            $list->valid(); $list->next()) 
+            { 
+                $filename = $list->current();
+                
+                $filename = str_replace($templatesPath, '', $filename);
+                $filenameIncludingSubfolder = $filename;
+                $isTemplate = preg_match("/(.html|.twig)$/u", $filename);
+                
+                if ($isTemplate) $templatesArray[$filenameIncludingSubfolder] = $filename;
+            }
+        }        
 
         return craft()->templates->render('placid/_widgets/request/settings', array(
             'requests' => $requestsArray,
@@ -95,4 +114,5 @@ class Placid_RequestWidget extends BaseWidget
     {
         return $this->getSettings()->colspan;
     }
+
 }

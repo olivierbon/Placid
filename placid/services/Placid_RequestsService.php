@@ -414,7 +414,7 @@ class Placid_RequestsService extends PlacidService
         return $message;
       }
       else {
-        return false;
+        return null;
       }
     }
 
@@ -422,8 +422,16 @@ class Placid_RequestsService extends PlacidService
     {
       craft()->placid_cache->set($request->getUrl(), $response->json(), $this->config['duration']);
     }
-    return $response->json();
+
+    try {
+      $output = $response->json();
+    } catch (\RuntimeException $e) {
+      Craft::log('Placid - ' - $e->getMessage(), LogLevel::Error);
+      $output = null;
+    }
+    return $output;
   }
+
   /**
    * Authenticate the request, used if OAuth provider is chosen on request creation
    *
@@ -431,7 +439,6 @@ class Placid_RequestsService extends PlacidService
    * @param object $client
    * @return boolean
    */
-
   private function _authenticate($client, $auth)
   {
     $provider = craft()->oauth->getProvider($auth);

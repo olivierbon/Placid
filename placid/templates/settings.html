@@ -3,8 +3,19 @@
 	{{ forms.checkboxField({
         label: "Cache requests"|t,
         instructions: "This will enable caching for all requests"|t,
-        id: 'handle',
+        id: 'cache',
         class: 'cache',
         name: 'cache',
         checked: settings.cache
     }) }}
+	
+    {{ forms.textField({
+        label: "Widget templates path"|t,
+        instructions: "This is relative to your templates folder"|t,
+        id: 'widgetTemplatesPath',
+        class: 'widgetTemplatesPath',
+        name: 'widgetTemplatesPath',
+        placeholder: '/path/to/your/request/template/',
+        value: settings.widgetTemplatesPath
+    }) }}
+

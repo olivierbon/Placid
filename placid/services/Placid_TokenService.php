@@ -31,15 +31,10 @@ class Placid_TokenService extends PlacidService
    */
   private $token;
 
-  public function __construct($tokenRecord = null)
+  public function __construct()
   {
     $this->record = new Placid_TokenRecord;
     $this->model = new Placid_TokenModel();
-
-    $this->tokenRecord = $tokenRecord;
-    if(is_null($this->tokenRecord)) {
-        $this->tokenRecord = Placid_TokenRecord::model();
-    }
   }
 
   /**
@@ -69,11 +64,11 @@ class Placid_TokenService extends PlacidService
   {
     if($id = $model->getAttribute('id'))
     {
-      $record = $this->tokenRecord->findByPk($id);
+      $record = $this->record->findByPk($id);
     }
     else
     {
-      $record = $this->tokenRecord->create();
+      $record = new Placid_TokenRecord();
     }
     $attributes = $model->getAttributes();
     //  Fix this, only saves as unsafe value
@@ -98,7 +93,7 @@ class Placid_TokenService extends PlacidService
   */
   public function getAllTokens()
   {
-    $records = $this->tokenRecord->findAll(array('order' => 't.id'));
+    $records = $this->record->findAll(array('order' => 't.id'));
 
     foreach($records as $record)
     {

@@ -27,12 +27,5 @@ class Placid_RequestsRecord extends BaseRecord
       'token' => array(static::BELONGS_TO, 'Placid_TokenRecord', 'required' => false, 'onDelete' => static::SET_NULL)
     );
   }
-  public function create()
-  {
-    $class = get_class($this);
-    $record = new $class();
-
-    return $record;
-  }
 
 }

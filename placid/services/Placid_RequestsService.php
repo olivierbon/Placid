@@ -32,18 +32,12 @@ class Placid_RequestsService extends PlacidService
    */
   protected $config;
 
-  public function __construct($record = null)
+  public function __construct()
   {
 
     parent::__construct();
-
-    $this->record = $record;
     $this->model = new Placid_RequestsModel;
-
-    if(is_null($this->record))
-    {
-      $this->record = Placid_RequestsRecord::model();
-    }
+    $this->record = new Placid_RequestsRecord();
     // Get the plugin settings
     $this->placid_settings = $this->settings;
   }
@@ -198,7 +192,7 @@ class Placid_RequestsService extends PlacidService
     // Get the request record by its handle
     // ---------------------------------------------
 
-    $record =  $this->record->find(
+    $record =  Placid_RequestsRecord::model()->find(
       'handle=:handle',
       array(
         ':handle' => $handle
@@ -237,7 +231,7 @@ class Placid_RequestsService extends PlacidService
     } 
     else 
     {
-      $record = $this->record->create();
+      $record = new Placid_RequestsRecord();
     }
 
     // Get the attributes from the passed model

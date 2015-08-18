@@ -77,7 +77,7 @@ class Placid_OAuthService extends PlacidService
 		}
 		else
 		{
-			$record = $this->record->create();
+			$record = new Placid_OAuthRecord();
 		}
 		
 		if($existingToken)

@@ -24,11 +24,6 @@ class PlacidPlugin extends BasePlugin
   {
     return true;
   }
-  public function init()
-  {
-    $path = craft()->config->parseEnvironmentString($this->getSettings()->widgetTemplatesPath);
-    // $this->poop($path);
-  }
   public function registerCpRoutes()
     {
         return array(

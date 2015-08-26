@@ -46,7 +46,7 @@ class Placid_RequestsService extends PlacidService
   * Make the request
   *
   * This method will create a new client and get a response from a Guzzle request
-  *                                   
+  *
   * @param string|null      $handle     The handle of the request record
   *
   * @return array   the req
@@ -79,8 +79,15 @@ class Placid_RequestsService extends PlacidService
     {
       $record = null;
     }
-    
-    $request = $this->_createRequest($client, $record);
+
+    if($record)
+    {
+      $request = $this->_createRequest($client, $record);
+    }
+    else
+    {
+      $request = $client->createRequest($this->config['method'], $this->config['url']);
+    }
 
     // Get a cached request
     $cachedRequest = craft()->placid_cache->get(base64_encode(urlencode($request->getUrl())));
@@ -113,16 +120,16 @@ class Placid_RequestsService extends PlacidService
     craft()->placid_requests->onAfterRequest($event);
 
     return $response;
-    
+
   }
-  
+
   /**
   * Create a new model object of a request
-  *                                   
-  * @param array     $attributes  The attributes to save against the model 
+  *
+  * @param array     $attributes  The attributes to save against the model
   *
   * @return model    returns Placid_RequestsModel object
-  *          
+  *
   */
   public function newRequest($attributes = array())
   {
@@ -140,10 +147,10 @@ class Placid_RequestsService extends PlacidService
 
   /**
    * Get all placid requests
-   * 
+   *
    * @deprecated Deprecated in 1.3. Use {@link AppBehavior::getBuild() craft()->placid_requests->getAll()} instead. All these sort of methods are being combined for a more streamlined, DRY API.
    *
-   * @return requests model object 
+   * @return requests model object
    */
 
   public function getAllRequests()
@@ -157,7 +164,7 @@ class Placid_RequestsService extends PlacidService
   * Find request by ID
   *
   * @param string $id
-  * 
+  *
   * @deprecated Deprecated in 1.3. Use {@link AppBehavior::getBuild() craft()->placid_requests->getById()} instead. All these sort of methods are being combined for a more streamlined, DRY API.
   *
   * @return request model object
@@ -225,11 +232,11 @@ class Placid_RequestsService extends PlacidService
     // Determine whether this is an existing request or if we need to create a new one
     // --------------------------------------------------------------------------------
 
-    if($id = $model->getAttribute('id')) 
+    if($id = $model->getAttribute('id'))
     {
       $record = $this->record->findByPk($id);
-    } 
-    else 
+    }
+    else
     {
       $record = new Placid_RequestsRecord();
     }
@@ -247,13 +254,13 @@ class Placid_RequestsService extends PlacidService
     {
       $model->setAttribute('id', $record->getAttribute('id'));
       return true;
-    } 
-    else 
+    }
+    else
     {
       $model->addErrors($record->getErrors());
       return false;
     }
-  } 
+  }
 
   /**
    * Delete a request from the database.
@@ -267,7 +274,7 @@ class Placid_RequestsService extends PlacidService
     $this->_deleteWidgetsByRecord($id);
     return $this->record->deleteByPk($id);
   }
-  
+
   // Events
   // =============================================================================
 
@@ -290,17 +297,17 @@ class Placid_RequestsService extends PlacidService
   {
     $this->raiseEvent('onAfterRequest', $event);
   }
-  
+
   // Private Methods
   // =============================================================================
-  
+
   /**
   * Create a new request object
-  *                                   
-  * @param array     $attributes  The attributes to save against the model 
+  *
+  * @param array     $attributes  The attributes to save against the model
   *
   * @return object    returns EntityEnclosingRequest $request
-  *          
+  *
   */
   private function _createRequest($client, $record = null)
   {
@@ -347,7 +354,7 @@ class Placid_RequestsService extends PlacidService
 
     // Get the parameters from the record
     $cpQuery = $record->getAttribute('params');
-    
+
     // If they exist, add them to the query
     if($cpQuery && is_array($cpQuery))
     {
@@ -355,7 +362,7 @@ class Placid_RequestsService extends PlacidService
       {
         $query->set($q['key'], $q['value']);
       }
-    } 
+    }
     elseif(array_key_exists('query', $this->config))
     {
       foreach($this->config['query'] as $key => $value)
@@ -437,7 +444,7 @@ class Placid_RequestsService extends PlacidService
   {
     $provider = craft()->oauth->getProvider($auth);
     $token = craft()->placid_oAuth->getToken($auth);
-    $provider->setToken($token);  
+    $provider->setToken($token);
     $subscriber = $provider->getSubscriber();
     $client->addSubscriber($subscriber);
   }
@@ -446,7 +453,7 @@ class Placid_RequestsService extends PlacidService
    * If there have been any config naming changes, this function will handle it
    * gracefully so templates don't start failing everywhere because I change my
    * mind too much!
-   *   
+   *
    * @param  String $new The new config key
    * @param  String $old The old config key to be replaced
    * @return Bool     Whether it was a success
@@ -482,5 +489,11 @@ class Placid_RequestsService extends PlacidService
       }
     }
     return true;
+  }
+
+  public function poop($nugget)
+  {
+    Craft::dump($nugget);
+    craft()->end();
   }
 }

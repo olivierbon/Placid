@@ -2,7 +2,8 @@
 namespace Craft;
 
 class PlacidController extends BaseController
-{	
+{
+
 	// Request CP methods
 	// =============================================================================
 
@@ -13,6 +14,11 @@ class PlacidController extends BaseController
 	public function actionPlacidIndex()
 	{
 		$variables['requests'] = craft()->placid_requests->getAll();
+
+		$gitHubVersionResponse = $this->actionGetLatestVersion();
+
+		$variables['latestVersion'] = $gitHubVersionResponse['tag_name'];
+
 		$this->renderTemplate('placid/requests/index', $variables);
 	}
 
@@ -52,7 +58,7 @@ class PlacidController extends BaseController
 	/**
 	 * Renders the Auth template in the CP
 	 * @param  array  $variables Variables available to the template
-	 * @return 
+	 * @return
 	 */
 	public function actionAuthIndex(array $variables = array())
 	{
@@ -84,7 +90,7 @@ class PlacidController extends BaseController
 
 	// OAuth CP methods
 	// =============================================================================
-	
+
 	public function actionOAuthIndex(array $variables = array())
 	{
 		// Get the OAuth Plugin
@@ -113,7 +119,7 @@ class PlacidController extends BaseController
 	{
 		$providers = craft()->placid_oAuth->getAll();
 
-		
+
 		if($providers)
 		{
 			$values = array();
@@ -123,7 +129,7 @@ class PlacidController extends BaseController
 	        }
 	        return $values;
 		}
-		
+
   //       return null;
 	}
 
@@ -141,10 +147,13 @@ class PlacidController extends BaseController
         }
         return $values;
 	}
-	public function poop($nugget)
+
+	public function actionGetLatestVersion()
 	{
-		echo "<pre>";
-		print_r($nugget);
-		die();
+		$config = array(
+			'url' => 'https://api.github.com/repos/alecritson/Placid/releases/latest',
+			'cache' => false
+		);
+		return craft()->placid_requests->request(null, $config);
 	}
 }

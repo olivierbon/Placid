@@ -8,7 +8,8 @@
     { label: request ? request.name : 'New request', url: url( request ? 'placid/requests/' ~ request.id : 'placid/requests/new') }
 ] %}
 
-{% set content %}
+
+{% block main %}
 
   <form method="post" action="" accept-charset="UTF-8" data-saveshortcut="1" data-saveshortcut-redirect="/admin/placid/{% if request %}requests/{{ request.id }}{% endif %}">
     <input type="hidden" name="action" value="placid/requests/saveRequest">
@@ -16,110 +17,48 @@
     {% if request %}
       <input type="hidden" name="requestId" value="{{ request.id }}" />
     {% endif %}
-
-    {{ forms.textField({
-      label: 'Name'|t,
-      id : 'name',
-      required: true,
-      name: 'requestName',
-      value: request ? request.name : null,
-      errors: request ? request.errors('name') : null
-    }) }}
-
-    {{ forms.textField({
-      label: "Handle"|t,
-      instructions: "How you’ll refer to this request in the templates."|t,
-      id: 'handle',
-      class: 'code',
-      name: 'handle',
-      value: request ? request.handle : null,
-      errors: request ? request.errors('handle') : null,
-      required: true
-    }) }}
-
-    {{ forms.textField({
-      label: 'URL'|t,
-      required: true,
-      id: 'query',
-      name: 'requestUrl',
-      value: request ? request.url : null,
-      errors: request ? request.errors('url') : null
-    }) }}
-    
-    {% if providers|length %}
-      {{ forms.selectField({
-        label: "Authentication" | t,
-        name: 'oauth',
-        instructions: 'Select which OAUTH provider to use for authentication.',
-        options: providers,
-        value : request ? request.oauth : null,
-      }) }}
-    {% endif %}
-
-    {% if accessTokens|length %}
-      {{ forms.selectField({
-        label: "Basic Authentication" | t,
-        name: 'tokenId',
-        instructions: 'Select which access token to add to requests',
-        options: accessTokens,
-        value : request ? request.tokenId : null,
-      }) }}
-    {% endif %}
-
-    {{ forms.editableTableField({
-      label: 'Query String',
-      instructions : 'Define your query string.',
-      id: 'params',
-      rows: 4,
-      textual: false,
-      name: 'params',
-      addRowLabel : 'Add values',
-      cols : {
-        'key' : {
-            'heading' : 'Key',
-            'type'   : 'singleline'
-        },
-        'value' : {
-            'heading' : 'Value',
-            'type'   : 'singleline'
-        }
-      },
-      rows : request ? request.params : null
-    }) }}
-
-    {{ forms.editableTableField({
-      label: 'Headers',
-      instructions : 'Add your request headers here.',
-      id: 'headers',
-      rows: 4,
-      textual: false,
-      name: 'headers',
-      addRowLabel : 'Add values',
-      cols : {
-        'key' : {
-            'heading' : 'Key',
-            'type'   : 'singleline'
-        },
-        'value' : {
-            'heading' : 'Value',
-            'type'   : 'singleline'
-        }
-      },
-      rows : request ? request.headers : null
-    }) }}
-
-    <div class="btngroup submit first">
-        <input type="submit" class="btn submit" value="{{ 'Save'|t }}">
-
-        {#<div class="btn submit menubtn"></div>
-        <div class="menu">
-          <ul>
-           <li><a class="formsubmit" data-param="requestId" data-value="" data-redirect="placid">{{ "Save as a new request"|t }}</a></li>
-          </ul>
-        </div>#}
+  
+    <div class="grid first">
+      
+        <div class="item" data-position="left" data-min-colspan="2" data-max-colspan="3">
+          <div class="pane">
+            {% include 'placid/requests/_fields' %}
+          </div>
+        </div>
+        <div class="item" data-position="right" data-colspan="1">
+          <div id="settings" class="pane">
+            {{ forms.lightswitchField({
+              label: 'Cache request?',
+              name : 'cache',
+              on : request ? request.cache : true
+            }) }}
+            {% if providers|length %}
+              {{ forms.selectField({
+                label: "Authentication" | t,
+                name: 'oauth',
+                instructions: 'Select which OAUTH provider to use.',
+                options: providers,
+                value : request ? request.oauth : null,
+              }) }}
+            {% endif %}
+            {% if accessTokens|length %}
+              {{ forms.selectField({
+                label: "Basic Authentication" | t,
+                name: 'tokenId',
+                instructions: 'Select which access token to add to requests',
+                options: accessTokens,
+                value : request ? request.tokenId : null,
+              }) }}
+            {% endif %}
+            
+          </div>
+          <div class="buttons first">
+            <input type="submit" class="btn submit" value="{{ 'Save Request'|t }}">
+          </div>
+        </div>
     </div>
   </form>
-{% endset %}
+{% endblock %}
 
 {% set js %}
     new Craft.HandleGenerator('#name', '#handle');

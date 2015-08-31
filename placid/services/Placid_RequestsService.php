@@ -54,11 +54,20 @@ class Placid_RequestsService extends PlacidService
 
   public function request($handle = null, array $config = array())
   {
+    // Get our request from the database...or not
+    if(!array_key_exists('url', $config))
+    {
+      $model = $this->findRequestByHandle($handle);
+    }
+    else
+    {
+      $model = null;
+    }
 
     $this->config = array_merge(
       array(
         'method' => 'GET',
-        'cache' => $this->placid_settings['cache'],
+        'cache' => ($model ? $model->cache : true),
         'duration' => 3600, // 1 hour
       ),
       $config
@@ -71,18 +80,9 @@ class Placid_RequestsService extends PlacidService
     // Create a new guzzle client
     $client = new Client();
 
-    if(!array_key_exists('url', $this->config))
+    if($model)
     {
-      $record = $this->findRequestByHandle($handle);
-    }
-    else
-    {
-      $record = null;
-    }
-
-    if($record)
-    {
-      $request = $this->_createRequest($client, $record);
+      $request = $this->_createRequest($client, $model);
     }
     else
     {
@@ -91,6 +91,7 @@ class Placid_RequestsService extends PlacidService
 
     // Get a cached request
     $cachedRequest = craft()->placid_cache->get(base64_encode(urlencode($request->getUrl())));
+    $caches = craft()->placid_cache->get(base64_encode(urlencode($request->getUrl())));
 
     // Import the onBeforeRequest event
     Craft::import('plugins.placid.events.PlacidBeforeRequestEvent');
@@ -102,6 +103,7 @@ class Placid_RequestsService extends PlacidService
     {
       if( (! $this->config['cache'] || ! $cachedRequest) && ! $event->bypassCache)
       {
+
         $response = $this->_getResponse($client, $request);
       }
       else
@@ -430,6 +432,8 @@ class Placid_RequestsService extends PlacidService
       Craft::log('Placid - ' - $e->getMessage(), LogLevel::Error);
       $output = null;
     }
+
+    
     return $output;
   }
 

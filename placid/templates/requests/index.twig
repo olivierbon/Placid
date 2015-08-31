@@ -11,8 +11,6 @@
     <div class="buttons" style="width:500px;">
       <a href="{{ url('placid/requests/new')}}" class="btn submit add icon">Add request</a>
     </div>
-
-
     <table id="fields" class="data fullwidth collapsible">
       <thead>
         <tr>
@@ -20,6 +18,8 @@
           <th scope="col">{{ "Name"|t }}</th>
           <th scope="col">{{ "Handle"|t }}</th>
           <th scope="col">{{ "URL"|t }}</th>
+          <th scope="col">{{ "Cache"|t }}</th>
+
           <th scope="col">{{ "OAuth"|t }}</th>
           <th scope="col">{{ "Basic Auth"|t }}</th>
           <th scope="col">{{ "Delete"|t }}</th>
@@ -32,6 +32,8 @@
             <td><a href="{{ url("placid/requests/" ~ request.id) }}">{{ request.name }}</a></td>
             <td>{{ request.handle }}</td>
             <td>{{ request.url }} </td>
+            <td><span class="status {{ request.cache ? 'live' : 'disabled' }}"></span> </td>
+            
             <td><span class="status {{ request.oauth ? 'live' : 'disabled' }}"></span> </td>
             <td><span class="status {{ request.tokenId ? 'live' : 'disabled' }}"></span> </td>
             <td><a class="delete icon" title="{{ 'Delete'|t }}"></a></td>

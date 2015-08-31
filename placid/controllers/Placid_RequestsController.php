@@ -21,9 +21,8 @@ class Placid_RequestsController extends BaseController
       if($id = craft()->request->getPost('requestId')) {
         $model = craft()->placid_requests->getById($id);
       } else {
-        $model = craft()->placid_requests->newRequest($id);
+        $model = new Placid_RequestsModel();
       }
-
 
       // Get the params from the form
       $params = craft()->request->getPost('params');
@@ -51,6 +50,7 @@ class Placid_RequestsController extends BaseController
         'oauth' => craft()->request->getPost('oauth'),
         'tokenId' => craft()->request->getPost('tokenId'),
         'url' => craft()->request->getPost('requestUrl'),
+        'cache' => craft()->request->getPost('cache'),
         'params' => $params,
         'headers' => $headers,
       );

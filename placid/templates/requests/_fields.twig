@@ -1,0 +1,70 @@
+{{ forms.textField({
+      label: 'Name'|t,
+      id : 'name',
+      required: true,
+      name: 'requestName',
+      value: request ? request.name : null,
+      errors: request ? request.errors('name') : null
+    }) }}
+
+    {{ forms.textField({
+      label: "Handle"|t,
+      instructions: "How you’ll refer to this request in the templates."|t,
+      id: 'handle',
+      class: 'code',
+      name: 'handle',
+      value: request ? request.handle : null,
+      errors: request ? request.errors('handle') : null,
+      required: true
+    }) }}
+
+    {{ forms.textField({
+      label: 'URL'|t,
+      required: true,
+      id: 'query',
+      name: 'requestUrl',
+      value: request ? request.url : null,
+      errors: request ? request.errors('url') : null
+    }) }}
+  
+    {{ forms.editableTableField({
+      label: 'Query String',
+      instructions : 'Define your query string.',
+      id: 'params',
+      rows: 4,
+      textual: false,
+      name: 'params',
+      addRowLabel : 'Add values',
+      cols : {
+        'key' : {
+            'heading' : 'Key',
+            'type'   : 'singleline'
+        },
+        'value' : {
+            'heading' : 'Value',
+            'type'   : 'singleline'
+        }
+      },
+      rows : request ? request.params : null
+    }) }}
+
+    {{ forms.editableTableField({
+      label: 'Headers',
+      instructions : 'Add your request headers here.',
+      id: 'headers',
+      rows: 4,
+      textual: false,
+      name: 'headers',
+      addRowLabel : 'Add values',
+      cols : {
+        'key' : {
+            'heading' : 'Key',
+            'type'   : 'singleline'
+        },
+        'value' : {
+            'heading' : 'Value',
+            'type'   : 'singleline'
+        }
+      },
+      rows : request ? request.headers : null
+    }) }}

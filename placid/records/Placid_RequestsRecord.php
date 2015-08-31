@@ -18,6 +18,7 @@ class Placid_RequestsRecord extends BaseRecord
             'oauth' => AttributeType::String,
             'params' => array(AttributeType::Mixed, 'required' => false),
             'headers' => array(AttributeType::Mixed, 'required' => false),
+            'cache' => array(AttributeType::Bool, 'required' => true, 'default' => true),
             'cache_id' => array(AttributeType::Mixed, 'required' => false)
         );
     }

@@ -64,6 +64,7 @@ class Placid_RequestsService extends PlacidService
       $model = null;
     }
 
+
     $this->config = array_merge(
       array(
         'method' => 'GET',
@@ -72,6 +73,7 @@ class Placid_RequestsService extends PlacidService
       ),
       $config
     );
+
 
     // Handle any changes to api gracefully
     $this->_swapDeprecatedConfig('path', 'segments');
@@ -89,6 +91,8 @@ class Placid_RequestsService extends PlacidService
       $request = $client->createRequest($this->config['method'], $this->config['url']);
     }
 
+
+
     // Get a cached request
     $cachedRequest = craft()->placid_cache->get(base64_encode(urlencode($request->getUrl())));
     $caches = craft()->placid_cache->get(base64_encode(urlencode($request->getUrl())));
@@ -103,6 +107,7 @@ class Placid_RequestsService extends PlacidService
     {
       if( (! $this->config['cache'] || ! $cachedRequest) && ! $event->bypassCache)
       {
+
 
         $response = $this->_getResponse($client, $request);
       }
@@ -319,7 +324,10 @@ class Placid_RequestsService extends PlacidService
       $this->config['url'] = $recordUrl;
     }
 
+
     $request = $client->createRequest($this->config['method'], $this->config['url']);
+
+
 
     if(array_key_exists('body', $this->config))
     {
@@ -351,11 +359,20 @@ class Placid_RequestsService extends PlacidService
       }
     }
 
-    // Get the query from the request
-    $query = $request->getQuery();
+    
 
     // Get the parameters from the record
     $cpQuery = $record->getAttribute('params');
+
+    if($request->getMethod() == 'GET')
+    {
+      // Get the query from the request
+      $query = $request->getQuery();
+    }
+    else
+    {
+      $query = $request->getPostFields();
+    }
 
     // If they exist, add them to the query
     if($cpQuery && is_array($cpQuery))
@@ -398,9 +415,11 @@ class Placid_RequestsService extends PlacidService
    */
   private function _getResponse(Client $client, $request)
   {
+
     try {
       $response = $client->send($request);
     } catch(RequestException $e) {
+
       // If we are in devmode, return the error message
       Craft::log('Placid - ' . $e->getMessage(), LogLevel::Error);
 
@@ -433,7 +452,6 @@ class Placid_RequestsService extends PlacidService
       $output = null;
     }
 
-    
     return $output;
   }
 
@@ -493,11 +511,5 @@ class Placid_RequestsService extends PlacidService
       }
     }
     return true;
-  }
-
-  public function poop($nugget)
-  {
-    Craft::dump($nugget);
-    craft()->end();
   }
 }

@@ -107,8 +107,6 @@ class Placid_RequestsService extends PlacidService
     {
       if( (! $this->config['cache'] || ! $cachedRequest) && ! $event->bypassCache)
       {
-
-
         $response = $this->_getResponse($client, $request);
       }
       else
@@ -324,10 +322,7 @@ class Placid_RequestsService extends PlacidService
       $this->config['url'] = $recordUrl;
     }
 
-
     $request = $client->createRequest($this->config['method'], $this->config['url']);
-
-
 
     if(array_key_exists('body', $this->config))
     {
@@ -358,8 +353,6 @@ class Placid_RequestsService extends PlacidService
         $request->addHeader($key, $value);
       }
     }
-
-    
 
     // Get the parameters from the record
     $cpQuery = $record->getAttribute('params');

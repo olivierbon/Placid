@@ -61,7 +61,7 @@ class Placid_RequestsController extends BaseController
       // Try and save the request, otherwise show an error
       // -----------------------------------------------------------------------------
 
-      
+
       if(craft()->placid_requests->saveRequest($model))
       {
         craft()->userSession->setNotice(Craft::t('Request saved'));
@@ -80,9 +80,9 @@ class Placid_RequestsController extends BaseController
       $this->requireAjaxRequest();
 
       $handle = craft()->request->getQuery('handle');
-      $options = array();
+      $options = craft()->request->getQuery('options', array());
 
-      $response = craft()->placid_requests->setOptions($options)->request($handle);
+      $response = craft()->placid_requests->request($handle, $options);
 
       $this->returnJson($response);
     }
@@ -101,7 +101,7 @@ class Placid_RequestsController extends BaseController
        $this->returnJson(array('success' => true));
     }
 
-    
+
     // Oauth
     /**
      * Connect
@@ -137,7 +137,7 @@ class Placid_RequestsController extends BaseController
         {
           craft()->userSession->setError(Craft::t($response['errorMsg']));
         }
-        
+
         craft()->httpSession->remove('twitter.referer');
 
         $this->redirect('placid/oauth');

@@ -10,7 +10,7 @@ class PlacidPlugin extends BasePlugin
   }
   function getVersion()
   {
-    return '1.5.2';
+    return '1.6.2';
   }
   function getDeveloper()
   {

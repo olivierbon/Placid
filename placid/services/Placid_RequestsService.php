@@ -91,8 +91,6 @@ class Placid_RequestsService extends PlacidService
       $request = $client->createRequest($this->config['method'], $this->config['url']);
     }
 
-
-
     // Get a cached request
     $cachedRequest = craft()->placid_cache->get(base64_encode(urlencode($request->getUrl())));
     $caches = craft()->placid_cache->get(base64_encode(urlencode($request->getUrl())));
@@ -433,17 +431,40 @@ class Placid_RequestsService extends PlacidService
       }
     }
 
-    if($this->config['cache'])
+    $contentType = preg_match('/.+?(?=;)/', $response->getContentType(), $matches);
+
+    $contentType = implode($matches, '');
+
+    // If there is no content type then just cast to json because of reasons.
+    if($contentType == '')
     {
-      craft()->placid_cache->set($request->getUrl(), $response->json(), $this->config['duration']);
+      $contentType = 'application/json';
     }
 
-    try {
-      $output = $response->json();
-    } catch (\RuntimeException $e) {
-      Craft::log('Placid - ' - $e->getMessage(), LogLevel::Error);
-      $output = null;
+    if($contentType = 'text/xml')
+    {
+      try {
+        $output = $response->xml();
+      } catch (\Guzzle\Common\Exception\RuntimeException $e) {
+        PlacidPlugin::log($e->getMessage(), LogLevel::Error);
+        $output = null;
+      }
     }
+    else
+    {
+      try {
+        $output = $response->json();
+      } catch (\Guzzle\Common\Exception\RuntimeException $e) {
+        PlacidPlugin::log($e->getMessage(), LogLevel::Error);
+        $output = null;
+      }
+    }
+
+    if($this->config['cache'])
+    {
+      craft()->placid_cache->set($request->getUrl(), $output, $this->config['duration']);
+    }
+
 
     return $output;
   }

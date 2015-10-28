@@ -441,7 +441,7 @@ class Placid_RequestsService extends PlacidService
       $contentType = 'application/json';
     }
 
-    if($contentType = 'text/xml')
+    if($contentType == 'text/xml')
     {
       try {
         $output = $response->xml();
@@ -526,4 +526,5 @@ class Placid_RequestsService extends PlacidService
     }
     return true;
   }
+
 }

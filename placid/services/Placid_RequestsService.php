@@ -411,8 +411,7 @@ class Placid_RequestsService extends PlacidService
       $response = $client->send($request);
     } catch(RequestException $e) {
 
-      // If we are in devmode, return the error message
-      Craft::log('Placid - ' . $e->getMessage(), LogLevel::Error);
+      PlacidPlugin::log($e->getMessage(), LogLevel::Error);
 
       $message = array('failed' => true);
 
@@ -434,12 +433,6 @@ class Placid_RequestsService extends PlacidService
     $contentType = preg_match('/.+?(?=;)/', $response->getContentType(), $matches);
 
     $contentType = implode($matches, '');
-
-    // If there is no content type then just cast to json because of reasons.
-    if($contentType == '')
-    {
-      $contentType = 'application/json';
-    }
 
     if($contentType == 'text/xml')
     {
@@ -512,16 +505,19 @@ class Placid_RequestsService extends PlacidService
    */
   private function _deleteWidgetsByRecord($id)
   {
-    $this->record = $this->record->findByPk($id);
+    $record = $this->record->findByPk($id);
 
     $currentWidgets = craft()->dashboard->getUserWidgets();
 
     foreach($currentWidgets as $widget)
     {
       $settings = $widget->settings;
-      if(array_key_exists('request', $settings) && $settings['request'] == $this->record->handle)
+      if($settings and is_array($settings))
       {
-       craft()->dashboard->deleteUserWidgetById($widget->id);
+        if(array_key_exists('request', $settings) && $settings['request'] == $record->handle)
+        {
+         craft()->dashboard->deleteUserWidgetById($widget->id);
+        }
       }
     }
     return true;

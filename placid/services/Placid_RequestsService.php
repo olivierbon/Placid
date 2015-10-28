@@ -512,7 +512,7 @@ class Placid_RequestsService extends PlacidService
     foreach($currentWidgets as $widget)
     {
       $settings = $widget->settings;
-      if($settings and is_array($settings))
+      if($settings && is_array($settings))
       {
         if(array_key_exists('request', $settings) && $settings['request'] == $record->handle)
         {

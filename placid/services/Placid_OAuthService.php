@@ -32,10 +32,10 @@ class Placid_OAuthService extends PlacidService
 	/**
 	 * Returns a model representing the token we want to get from
 	 * the OAuth plugin
-	 * 	
+	 *
 	 * @param  String $handle The handle of the token we want to find, usually this is just the
 	 *                        name of the provider itself.
-	 *                        
+	 *
 	 * @return Mixed  null|Placid_OAuthModel Either nothing or the model representation
 	 */
 	public function findByHandle($handle)
@@ -44,13 +44,12 @@ class Placid_OAuthService extends PlacidService
 
 		// Get the request record by its handle
 		// ---------------------------------------------
-		$record =  $this->record->find(
+		$record =  Placid_OAuthRecord::model()->find(
 		  'handle=:handle',
 		  array(
 		    ':handle' => $handle
 		    )
 		  );
-
 		if($record)
 		{
 		  return $this->model->populateModel($record);
@@ -59,7 +58,7 @@ class Placid_OAuthService extends PlacidService
 	}
 
 	/**
-	 * Saves a Placid_OAuthModel and also the Oauth_TokenModel which is handy 
+	 * Saves a Placid_OAuthModel and also the Oauth_TokenModel which is handy
 	 * @param  String           $provider Name of the provider we want to save
 	 * @param  Oauth_TokenModel $token    The OAuth token model we want to save
 	 * @return Bool                       1 or 0 if successfull
@@ -79,7 +78,7 @@ class Placid_OAuthService extends PlacidService
 		{
 			$record = new Placid_OAuthRecord();
 		}
-		
+
 		if($existingToken)
 		{
 			$token->id = $existingToken->id;
@@ -119,7 +118,7 @@ class Placid_OAuthService extends PlacidService
 
 			if($tokenModel)
 			{
-				$tokenId = $tokenModel->id;
+				$tokenId = $tokenModel->tokenId;
 			}
 
 			// $this->poop($tokenId);
@@ -145,7 +144,7 @@ class Placid_OAuthService extends PlacidService
 		$oauthTokenModel = craft()->oauth->getTokenById($tokenModel->id);
 
 		craft()->oauth->deleteToken($oauthTokenModel);
-		
+
 		if($tokenModel)
 		{
 			$this->record->deleteByPk($tokenModel->id);

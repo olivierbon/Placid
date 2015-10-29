@@ -458,7 +458,6 @@ class Placid_RequestsService extends PlacidService
       craft()->placid_cache->set($request->getUrl(), $output, $this->config['duration']);
     }
 
-
     return $output;
   }
 
@@ -472,9 +471,12 @@ class Placid_RequestsService extends PlacidService
   private function _authenticate($client, $auth)
   {
     $provider = craft()->oauth->getProvider($auth);
+
     $token = craft()->placid_oAuth->getToken($auth);
+
     $provider->setToken($token);
     $subscriber = $provider->getSubscriber();
+
     $client->addSubscriber($subscriber);
   }
 

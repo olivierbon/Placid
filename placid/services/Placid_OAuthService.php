@@ -105,12 +105,6 @@ class Placid_OAuthService extends PlacidService
 	 */
 	public function getToken($provider)
 	{
-		if($this->token)
-		{
-			return $this->token;
-		}
-		else
-		{
 			// Get the model
 			$tokenModel = $this->findByHandle($provider);
 
@@ -126,10 +120,9 @@ class Placid_OAuthService extends PlacidService
 
 			if($token)
 			{
-				$this->token = $token;
-				return $this->token;
+				return $token;
 			}
-		}
+
 	}
 
 	/**

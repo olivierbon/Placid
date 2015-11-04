@@ -14,11 +14,6 @@ class PlacidController extends BaseController
 	public function actionPlacidIndex()
 	{
 		$variables['requests'] = craft()->placid_requests->getAll();
-
-		$gitHubVersionResponse = $this->actionGetLatestVersion();
-
-		$variables['latestVersion'] = $gitHubVersionResponse['tag_name'];
-
 		$this->renderTemplate('placid/requests/index', $variables);
 	}
 
@@ -146,14 +141,5 @@ class PlacidController extends BaseController
             $values[$value['id']] = ucfirst($value['name']);
         }
         return $values;
-	}
-
-	public function actionGetLatestVersion()
-	{
-		$config = array(
-			'url' => 'https://api.github.com/repos/alecritson/Placid/releases/latest',
-			'cache' => false
-		);
-		return craft()->placid_requests->request(null, $config);
 	}
 }

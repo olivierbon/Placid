@@ -1,13 +1,6 @@
 {% extends "placid/_layout" %}
 
-{% set currentVersion = craft.plugins.getPlugin('placid').getVersion() %}
-
 {% set content %}
-
-    {% if latestVersion and latestVersion > currentVersion %}
-      <div class="success" style="position:absolute;right:0;" ><a href="https://github.com/alecritson/Placid/releases" title="View this release on Github" target="_blank">Version <code>{{ latestVersion }}</code> is available!</a></div>
-    {% endif %}
-
     <div class="buttons" style="width:500px;">
       <a href="{{ url('placid/requests/new')}}" class="btn submit add icon">Add request</a>
     </div>
@@ -33,7 +26,7 @@
             <td>{{ request.handle }}</td>
             <td>{{ request.url }} </td>
             <td><span class="status {{ request.cache ? 'live' : 'disabled' }}"></span> </td>
-            
+
             <td><span class="status {{ request.oauth ? 'live' : 'disabled' }}"></span> </td>
             <td><span class="status {{ request.tokenId ? 'live' : 'disabled' }}"></span> </td>
             <td><a class="delete icon" title="{{ 'Delete'|t }}"></a></td>

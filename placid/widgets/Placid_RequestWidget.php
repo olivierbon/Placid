@@ -30,16 +30,21 @@ class Placid_RequestWidget extends BaseWidget
 
         $variables = array();
 
-        $variables['response'] = craft()->placid_requests->request($settings->request);
+        try {
+          $variables['response'] = craft()->placid_requests->request($settings->request);
+        } catch (Exception $e) {
+          PlacidPlugin::log($e->getMessage(), LogLevel::Error);
+          $variables['response'] = null;
+        }
 
         $path = craft()->path->getSiteTemplatesPath();
         craft()->path->setTemplatesPath($path);
 
         try {
-             $body = craft()->templates->render($pluginSettings->widgetTemplatesPath . $settings->template, $variables);
+            $body = craft()->templates->render($pluginSettings->widgetTemplatesPath . $settings->template, $variables);
         } catch (TemplateLoaderException $e) {
-            Craft::log("Unable to load template {$templatesPath}");
-            return '<span class="error">Unable to load template, check logs for details</span>';
+            PlacidPlugin::log("Unable to load template {$path}");
+            $body = '<span class="error">Unable to load template, check logs for details</span>';
         }
 
         $path = craft()->path->getCpTemplatesPath();
@@ -51,7 +56,7 @@ class Placid_RequestWidget extends BaseWidget
     }
     protected function defineSettings()
     {
-        
+
         return array(
            'request' => AttributeType::String,
            'colspan' => AttributeType::Number,
@@ -59,7 +64,7 @@ class Placid_RequestWidget extends BaseWidget
         );
     }
     public function getSettingsHtml()
-    {   
+    {
         $pluginSettings = craft()->plugins->getPlugin('placid')->getSettings();
 
         // Get placid requests and send them to the widget settings
@@ -81,28 +86,28 @@ class Placid_RequestWidget extends BaseWidget
         if(!$templates)
         {
             $templatesArray = array('' => 'Cannot find templates');
-            Craft::log('Cannot find templates in path =' . $templatesPath .'=', LogLevel::Error);
+            Craft::log('Cannot find templates in path "' . $templatesPath .'"', LogLevel::Error);
         }
         else
         {
-            // Turn array into ArrayObject 
+            // Turn array into ArrayObject
             $templates = new \ArrayObject($templates);
 
             // Iterate over template list
-            // * Remove full path 
+            // * Remove full path
             // * Remove folders from list
             for ($list = $templates->getIterator();
-            $list->valid(); $list->next()) 
-            { 
+            $list->valid(); $list->next())
+            {
                 $filename = $list->current();
-                
+
                 $filename = str_replace($templatesPath, '', $filename);
                 $filenameIncludingSubfolder = $filename;
                 $isTemplate = preg_match("/(.html|.twig)$/u", $filename);
-                
+
                 if ($isTemplate) $templatesArray[$filenameIncludingSubfolder] = $filename;
             }
-        }        
+        }
 
         return craft()->templates->render('placid/_widgets/request/settings', array(
             'requests' => $requestsArray,

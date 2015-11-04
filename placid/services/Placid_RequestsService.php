@@ -64,7 +64,6 @@ class Placid_RequestsService extends PlacidService
       $model = null;
     }
 
-
     $this->config = array_merge(
       array(
         'method' => 'GET',
@@ -73,7 +72,6 @@ class Placid_RequestsService extends PlacidService
       ),
       $config
     );
-
 
     // Handle any changes to api gracefully
     $this->_swapDeprecatedConfig('path', 'segments');
@@ -120,7 +118,7 @@ class Placid_RequestsService extends PlacidService
 
     $event = new PlacidAfterRequestEvent($this, array('response' => $response));
 
-    craft()->placid_requests->onAfterRequest($event);
+    $this->onAfterRequest($event);
 
     return $response;
 

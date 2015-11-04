@@ -1,11 +1,6 @@
 {% import "_includes/forms" as forms %}
 
-{{ forms.textField({
-	label : "Colspan" | t,
-	name : 'colspan',
-	instructions : 'Change this if you need the widget to span more columns',
-	value : settings.colspan ?: 1
-})}}
+
 
 {{ forms.selectField({
     label: "Request" | t,

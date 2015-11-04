@@ -16,6 +16,10 @@ class PlacidPlugin extends BasePlugin
   {
     return 'Alec Ritson';
   }
+  function getDocumentationUrl()
+  {
+    return 'https://github.com/alecritson/Placid/wiki';
+  }
   function getDeveloperUrl()
   {
     return 'http://alecritson.co.uk';

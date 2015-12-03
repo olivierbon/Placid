@@ -1,0 +1,12 @@
+[
+  {
+      "version": "1.6.10",
+      "downloadUrl": "https://github.com/alecritson/Placid/archive/master.zip",
+      "date": "2015-12-03T00:00:00+00:00",
+      "notes": [
+          "# Going to 2.5",
+          "[Added] Plugin description",
+          "[Improved] Tabbed areas are now Control Panel Subnavs"
+      ]
+  }
+]

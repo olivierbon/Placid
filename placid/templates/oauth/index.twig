@@ -2,18 +2,19 @@
 
 {# Variables
   ----------------------------------------------- #}
-{% set selectedTab = 'oauth' %}
+{% set selectedSubnavItem = 'oauth' %}
 {% set settingsUrl = url('oauth/twitter') %}
 {% set oauth = craft.plugins.getPlugin('oauth', false) %}
+{% set title = 'OAuth connections' %}
 
 {% set content %}
-  
+
   {% if oauthPlugin %}
     {% if not oauthPlugin.isInstalled %}
        You need to install the OAuth Plugin
     {% elseif not oauthPlugin.isEnabled %}
       You need to enable the OAuth Plugin
-    {% else %}     
+    {% else %}
         {% include 'placid/oauth/providers-table' %}
     {% endif %}
   {% else %}

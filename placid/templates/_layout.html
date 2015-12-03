@@ -2,13 +2,10 @@
 
 {% import "_includes/forms" as forms %}
 
-{% set title = "Placid"|t %}
+{% set title = 'Placid - ' ~ title %}
 
-
-{% set tabs = {
-    requests: { label: "Requests"|t, url: url('placid') },
-    auth: { label: "Basic Auth"|t, url: url('placid/auth') },
-    oauth: { label: "OAuth"|t, url: url('placid/oauth') }
+{% set subnav = {
+  requests: { label: "Requests"|t, url: url('placid') },
+  auth: { label: "Basic Auth"|t, url: url('placid/auth') },
+  oauth: { label: "OAuth"|t, url: url('placid/oauth') }
 } %}
-
-

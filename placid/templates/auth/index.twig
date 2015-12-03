@@ -1,10 +1,10 @@
 {% extends "placid/_layout" %}
 
-{% set selectedTab = 'auth' %}
+{% set selectedSubnavItem  = 'auth' %}
 
 {% set content %}
-
 {% set settingsUrl = url('oauth/twitter') %}
+{% set title = 'Access tokens' %}
 
 {% set oauth = craft.plugins.getPlugin('oauth', false) %}
 
@@ -32,7 +32,7 @@
           <span class="disabled">Hidden</small>
         {% endif %}
       </td>
-      <td><a class="delete icon" title="{{ 'Delete'|t }}"></a></td> 
+      <td><a class="delete icon" title="{{ 'Delete'|t }}"></a></td>
     </tr>
     {% endfor %}
   </tbody>

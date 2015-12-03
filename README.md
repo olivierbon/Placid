@@ -1,5 +1,5 @@
 ![Repo header image](http://itsalec.co.uk/images/placid-github-header.jpg)  
-![Placid Screenshot](http://itsalec.co.uk/images/placid_1.5.0.jpg)
+![Placid Screenshot](http://itsalec.co.uk/images/placid.1.6.10.jpg)
 
 Placid is a Craft plugin which makes it easy to use REST services in your twig templates, whether thats getting a twitter feed, showing off dribbble shots or getting the weather, Placid has you covered.
 

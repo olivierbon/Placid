@@ -32,6 +32,12 @@ class Placid_RequestsService extends PlacidService
    */
   protected $config;
 
+  /**
+   * The cache id of the request
+   * @var String
+   */
+  protected $cacheId;
+
   public function __construct()
   {
 
@@ -90,8 +96,7 @@ class Placid_RequestsService extends PlacidService
     }
 
     // Get a cached request
-    $cachedRequest = craft()->placid_cache->get(base64_encode(urlencode($request->getUrl())));
-    $caches = craft()->placid_cache->get(base64_encode(urlencode($request->getUrl())));
+    $cachedRequest = craft()->placid_cache->get($this->_getCacheId());
 
     // Import the onBeforeRequest event
     Craft::import('plugins.placid.events.PlacidBeforeRequestEvent');
@@ -318,6 +323,8 @@ class Placid_RequestsService extends PlacidService
       $this->config['url'] = $recordUrl;
     }
 
+    $this->cacheId = $this->config['url'];
+
     $request = $client->createRequest($this->config['method'], $this->config['url']);
 
     if(array_key_exists('body', $this->config))
@@ -377,6 +384,11 @@ class Placid_RequestsService extends PlacidService
       {
         $query->set($key, $value);
       }
+    }
+
+    if($query)
+    {
+      $this->cacheId .= '?' . $query;
     }
 
     // Do we need to do some OAuth magic?
@@ -453,7 +465,7 @@ class Placid_RequestsService extends PlacidService
 
     if($this->config['cache'])
     {
-      craft()->placid_cache->set($request->getUrl(), $output, $this->config['duration']);
+      craft()->placid_cache->set($this->_getCacheId(), $output, $this->config['duration']);
     }
 
     return $output;
@@ -523,4 +535,12 @@ class Placid_RequestsService extends PlacidService
     return true;
   }
 
+  /**
+   * Returns the encoded cacheId for this request
+   * @return String The cache id
+   */
+  private function _getCacheId()
+  {
+    return base64_encode(urlencode($this->cacheId));
+  }
 }

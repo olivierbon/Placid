@@ -1,5 +1,14 @@
 [
   {
+      "version": "1.6.16",
+      "downloadUrl": "https://github.com/alecritson/Placid/archive/master.zip",
+      "date": "2015-12-11T00:00:00+00:00",
+      "notes": [
+          "# Bug Fixes",
+          "[Fixed] Fixed a bug where placid would return the wrong cached request for POST requests"
+      ]
+  },
+  {
       "version": "1.6.10",
       "downloadUrl": "https://github.com/alecritson/Placid/archive/master.zip",
       "date": "2015-12-03T00:00:00+00:00",

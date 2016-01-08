@@ -8,6 +8,7 @@
     { label: request ? request.name : 'New request', url: url( request ? 'placid/requests/' ~ request.id : 'placid/requests/new') }
 ] %}
 
+{% set fullPageForm = true %}
 
 {% block main %}
 
@@ -17,9 +18,9 @@
     {% if request %}
       <input type="hidden" name="requestId" value="{{ request.id }}" />
     {% endif %}
-  
+
     <div class="grid first">
-      
+
         <div class="item" data-position="left" data-min-colspan="2" data-max-colspan="3">
           <div class="pane">
             {% include 'placid/requests/_fields' %}
@@ -50,10 +51,7 @@
                 value : request ? request.tokenId : null,
               }) }}
             {% endif %}
-            
-          </div>
-          <div class="buttons first">
-            <input type="submit" class="btn submit" value="{{ 'Save Request'|t }}">
+
           </div>
         </div>
     </div>

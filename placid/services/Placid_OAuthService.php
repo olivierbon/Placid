@@ -115,7 +115,6 @@ class Placid_OAuthService extends PlacidService
 				$tokenId = $tokenModel->tokenId;
 			}
 
-			// $this->poop($tokenId);
 			$token = craft()->oauth->getTokenById($tokenId);
 
 			if($token)

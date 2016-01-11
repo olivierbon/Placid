@@ -1,5 +1,15 @@
 [
   {
+      "version": "1.6.18",
+      "downloadUrl": "https://github.com/alecritson/Placid/archive/master.zip",
+      "date": "2016-01-07T00:00:00+00:00",
+      "notes": [
+          "# Bug Fixes",
+          "[Fixed] Fixed an issue with the `$provider->getToken()` method doesn't exist error",
+          "[Fixed] Cache was broken (sorry) but it's fixed now!",
+      ]
+  },
+  {
       "version": "1.6.16",
       "downloadUrl": "https://github.com/alecritson/Placid/archive/master.zip",
       "date": "2015-12-11T00:00:00+00:00",

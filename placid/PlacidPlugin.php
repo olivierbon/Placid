@@ -10,7 +10,7 @@ class PlacidPlugin extends BasePlugin
   }
   function getVersion()
   {
-    return '1.6.16';
+    return '1.6.18';
   }
   function getDeveloper()
   {
@@ -22,7 +22,7 @@ class PlacidPlugin extends BasePlugin
   }
   public function getReleaseFeedUrl()
   {
-      return 'https://raw.githubusercontent.com/alecritson/Placid/master/placid/manifest.json';
+      return 'https://raw.githubusercontent.com/alecritson/Placid/master/manifest.json';
   }
   function getDeveloperUrl()
   {

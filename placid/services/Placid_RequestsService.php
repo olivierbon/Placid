@@ -484,8 +484,7 @@ class Placid_RequestsService extends PlacidService
 
     $token = craft()->placid_oAuth->getToken($auth);
 
-    $provider->setToken($token);
-    $subscriber = $provider->getSubscriber();
+    $subscriber = $provider->getSubscriber($token);
 
     $client->addSubscriber($subscriber);
   }

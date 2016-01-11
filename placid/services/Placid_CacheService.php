@@ -29,11 +29,8 @@ class Placid_CacheService extends BaseApplicationComponent
 	 * @return bool true if the value is successfully stored into cache, false otherwise.
 	 */
 
-	public function set($url, $value, $duration)
+	public function set($cacheId, $value, $duration)
 	{
-		// Set the cacheId
-		$cacheId = base64_encode( urlencode($url) );
-
 		return craft()->cache->set($cacheId, $value, $duration, null);
 	}
 

@@ -431,44 +431,14 @@ class Placid_RequestsService extends PlacidService
         $message['statusCode'] = $response->getStatusCode();
       }
 
-      if(craft()->request->isAjaxRequest())
-      {
-        return $message;
-      }
-      else {
-        return null;
-      }
+      return $response;
     }
-
-    $contentType = preg_match('/.+?(?=;)/', $response->getContentType(), $matches);
-
-    $contentType = implode($matches, '');
-
-    if($contentType == 'text/xml')
-    {
-      try {
-        $output = $response->xml();
-      } catch (\Guzzle\Common\Exception\RuntimeException $e) {
-        PlacidPlugin::log($e->getMessage(), LogLevel::Error);
-        $output = null;
-      }
-    }
-    else
-    {
-      try {
-        $output = $response->json();
-      } catch (\Guzzle\Common\Exception\RuntimeException $e) {
-        PlacidPlugin::log($e->getMessage(), LogLevel::Error);
-        $output = null;
-      }
-    }
-
+    
     if($this->config['cache'])
     {
-      craft()->placid_cache->set($this->_getCacheId(), $output, $this->config['duration']);
+      craft()->placid_cache->set($this->_getCacheId(), $response, $this->config['duration']);
     }
-
-    return $output;
+    return $response;
   }
 
   /**

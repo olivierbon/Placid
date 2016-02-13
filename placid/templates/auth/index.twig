@@ -2,41 +2,46 @@
 
 {% set selectedSubnavItem  = 'auth' %}
 
-{% set content %}
-{% set settingsUrl = url('oauth/twitter') %}
 {% set title = 'Access tokens' %}
 
 {% set oauth = craft.plugins.getPlugin('oauth', false) %}
 
-<div class="buttons">
-  <a href="{{ url('placid/auth/new')}}" class="btn submit add icon">Add access token</a>
-</div>
+{% set extraPageHeaderHtml %}
+    <div class="buttons">
+      <a href="{{ url('placid/auth/new')}}" class="btn submit add icon">Add access token</a>
+    </div>
+{% endset %}
 
 
-<table id="fields" class="data fullwidth collapsible">
-  <thead>
-    <tr>
-      <th scope="col">{{ "Name"|t }}</th>
-      <th scope="col">{{ "Access token"|t }}</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for token in tokens %}
-    <tr data-id="{{ token.id }}" data-name="{{ token.name }}">
-      <td><a href="{{ url("placid/auth/" ~ token.id) }}">{{ token.name }}</a></td>
-      <td>
-        {% if user.admin %}
-          {{ token.encoded_token }}
-        {% else %}
-          <span class="disabled">Hidden</small>
-        {% endif %}
-      </td>
-      <td><a class="delete icon" title="{{ 'Delete'|t }}"></a></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% set content %}
+  {% if tokens %}
+  <table id="fields" class="data fullwidth">
+    <thead>
+      <tr>
+        <th scope="col">{{ "Name"|t }}</th>
+        <th scope="col">{{ "Access token"|t }}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for token in tokens %}
+      <tr data-id="{{ token.id }}" data-name="{{ token.name }}">
+        <td><a href="{{ url("placid/auth/" ~ token.id) }}">{{ token.name }}</a></td>
+        <td>
+          {% if user.admin %}
+            {{ token.encoded_token }}
+          {% else %}
+            <span class="disabled">Hidden</small>
+          {% endif %}
+        </td>
+        <td><a class="delete icon" title="{{ 'Delete'|t }}"></a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <span class="disabled">You haven't added any access tokens</span>
+  {% endif %}
 {% endset %}
 {% set js %}
   new Craft.AdminTable({

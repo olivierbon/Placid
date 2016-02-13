@@ -9,7 +9,8 @@ class PlacidVariable
     }
     public function request($handle, $config = array())
     {
-        return craft()->placid_requests->request($handle, $config);
+        $response = craft()->placid_requests->request($handle, $config);
+        return new Placid_ResponseVariable($response);
     }
     public function getOauthToken($provider)
     {

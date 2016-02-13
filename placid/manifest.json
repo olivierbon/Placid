@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.7.112",
+    "downloadUrl": "https://github.com/alecritson/Placid/archive/master.zip",
+    "date": "2016-02-13T00:00:00+00:00",
+    "notes": [
+        "# Changes and additions",
+        "[Added] Responses now return an instance of `Placid_ResponseVariable`",
+        "[Changes] Changes for Craft 2.5",
+    ]
+  },
+  {
       "version": "1.6.18",
       "downloadUrl": "https://github.com/alecritson/Placid/archive/master.zip",
       "date": "2016-01-07T00:00:00+00:00",

@@ -8,13 +8,14 @@
     { label: request ? request.name : 'New request', url: url( request ? 'placid/requests/' ~ request.id : 'placid/requests/new') }
 ] %}
 
-{% set fullPageForm = true %}
 
 {% block main %}
 
   <form method="post" action="" accept-charset="UTF-8" data-saveshortcut="1" data-saveshortcut-redirect="/admin/placid/{% if request %}requests/{{ request.id }}{% endif %}">
     <input type="hidden" name="action" value="placid/requests/saveRequest">
     <input type="hidden" name="redirect" value="placid" />
+    <input type="hidden" name="{{ craft.config.csrfTokenName }}" value="{{ craft.request.csrfToken }}">
+
     {% if request %}
       <input type="hidden" name="requestId" value="{{ request.id }}" />
     {% endif %}
@@ -52,6 +53,9 @@
               }) }}
             {% endif %}
 
+          </div>
+          <div class="buttons first">
+            <input type="submit" class="btn submit" value="{{ 'Save Request'|t }}">
           </div>
         </div>
     </div>

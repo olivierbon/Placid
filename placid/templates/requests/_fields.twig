@@ -1,4 +1,9 @@
-{{ forms.textField({
+    {{ forms.hidden({
+      name: craft.config.csrfTokenName,
+      value: craft.request.csrfToken
+    }) }}
+
+    {{ forms.textField({
       label: 'Name'|t,
       id : 'name',
       required: true,
@@ -26,7 +31,7 @@
       value: request ? request.url : null,
       errors: request ? request.errors('url') : null
     }) }}
-  
+
     {{ forms.editableTableField({
       label: 'Query String',
       instructions : 'Define your query string.',

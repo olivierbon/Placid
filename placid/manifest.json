@@ -1,12 +1,11 @@
 [
   {
-    "version": "1.7.112",
+    "version": "1.6.19",
     "downloadUrl": "https://github.com/alecritson/Placid/archive/master.zip",
-    "date": "2016-02-13T00:00:00+00:00",
+    "date": "2016-01-11T00:00:00+00:00",
     "notes": [
-        "# Changes and additions",
-        "[Added] Responses now return an instance of `Placid_ResponseVariable`",
-        "[Changes] Changes for Craft 2.5",
+        "# Bug Fixes",
+        "[Fixed] Fixed a bug where settings couldn't be saved if CSRF was set to true in the craft configuration."
     ]
   },
   {
@@ -16,7 +15,7 @@
       "notes": [
           "# Bug Fixes",
           "[Fixed] Fixed an issue with the `$provider->getToken()` method doesn't exist error",
-          "[Fixed] Cache was broken (sorry) but it's fixed now!",
+          "[Fixed] Cache was broken (sorry) but it's fixed now!"
       ]
   },
   {

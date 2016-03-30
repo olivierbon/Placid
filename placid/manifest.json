@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.7.114",
+    "downloadUrl": "https://github.com/alecritson/Placid/archive/master.zip",
+    "date": "2016-03-30T00:00:00+00:00",
+    "notes": [
+        "# Bug fixes",
+        "[Fixed] Response for custom widgets was empty, this is now updated inline with previous update. You need to reference the response as `response.data` in your templates",
+        "[Fixed] Fixed issue with retrieving access token",
+    ]
+  },
+  {
     "version": "1.7.112",
     "downloadUrl": "https://github.com/alecritson/Placid/archive/master.zip",
     "date": "2016-02-13T00:00:00+00:00",

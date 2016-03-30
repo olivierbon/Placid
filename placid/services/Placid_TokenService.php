@@ -111,7 +111,7 @@ class Placid_TokenService extends PlacidService
   */ 
   public function findTokenById($id)
   {
-   if($record = $this->tokenRecord->findByPk($id))
+   if($record = Placid_TokenRecord::model()->findByPk($id))
    {
       return Placid_TokenModel::populateModel($record);
    }

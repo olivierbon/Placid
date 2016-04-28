@@ -397,12 +397,22 @@ class Placid_RequestsService extends BaseApplicationComponent
       $this->_authenticate($request,$provider);
     }
 
+
     // Has the request got an access token we need to attach?
     if($tokenId = $record->getAttribute('tokenId'))
     {
+      
       $tokenModel = craft()->placid_token->findTokenById($tokenId);
-      $request->addHeader('Authorization', 'Bearer ' . $tokenModel->encoded_token);
-      // $query->set('access_token', $tokenModel->encoded_token);
+
+      if(!$token->forceQuery)
+      {
+        $request->addHeader('Authorization', 'Bearer ' . $tokenModel->encoded_token);
+      }
+      else
+      {
+        $query->set('access_token', $tokenModel->encoded_token);
+      }
+
     }
 
     

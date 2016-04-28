@@ -1,17 +1,23 @@
-{% extends "_layouts/cp" %}
+{% extends "placid/_layout" %}
+
 {% import "_includes/forms" as forms %}
 
 {% set title = request ? request.name : "New Request"|t %}
+{% set fullPageForm = true %}
+{% set saveShortcutRedirect = "/admin/placid/" ~ (request ? 'requests/' ~ request.id)  %}
 
 {% set crumbs = [
     { label: "Placid"|t, url: url('placid') },
     { label: request ? request.name : 'New request', url: url( request ? 'placid/requests/' ~ request.id : 'placid/requests/new') }
 ] %}
 
+{% block saveButton %}
+  <input type="submit" class="btn submit" value="{{ 'Save Request'|t }}">
+{% endblock %}
 
 {% block main %}
 
-  <form method="post" action="" accept-charset="UTF-8" data-saveshortcut="1" data-saveshortcut-redirect="/admin/placid/{% if request %}requests/{{ request.id }}{% endif %}">
+
     <input type="hidden" name="action" value="placid/requests/saveRequest">
     <input type="hidden" name="redirect" value="placid" />
     <input type="hidden" name="{{ craft.config.csrfTokenName }}" value="{{ craft.request.csrfToken }}">
@@ -28,38 +34,34 @@
           </div>
         </div>
         <div class="item" data-position="right" data-colspan="1">
-          <div id="settings" class="pane">
+          <div id="settings" class="pane meta">
             {{ forms.lightswitchField({
               label: 'Cache request?',
               name : 'cache',
               on : request ? request.cache : true
             }) }}
+
             {% if providers|length %}
               {{ forms.selectField({
-                label: "Authentication" | t,
+                label: "OAuth Provider" | t,
                 name: 'oauth',
-                instructions: 'Select which OAUTH provider to use.',
                 options: providers,
                 value : request ? request.oauth : null,
               }) }}
             {% endif %}
             {% if accessTokens|length %}
               {{ forms.selectField({
-                label: "Basic Authentication" | t,
+                label: "Basic Auth" | t,
                 name: 'tokenId',
-                instructions: 'Select which access token to add to requests',
                 options: accessTokens,
                 value : request ? request.tokenId : null,
               }) }}
             {% endif %}
 
           </div>
-          <div class="buttons first">
-            <input type="submit" class="btn submit" value="{{ 'Save Request'|t }}">
-          </div>
         </div>
     </div>
-  </form>
+
 {% endblock %}
 
 {% set js %}

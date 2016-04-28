@@ -24,6 +24,7 @@ class Placid_TokenController extends BaseController
     // Set the attributes for the model
     $atts = array(
       'name' => craft()->request->getPost('name'),
+      'forceQuery' => craft()->request->getPost('forceQuery'),
       'encoded_token' => craft()->request->getPost('token'),
     );
 

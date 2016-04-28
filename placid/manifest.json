@@ -1,4 +1,16 @@
 [
+{
+    "version": "1.7.119",
+    "downloadUrl": "https://github.com/alecritson/Placid/archive/master.zip",
+    "date": "2016-04-28T00:00:00+00:00",
+    "notes": [
+        "# Additions",
+        "[Added] You can now force Basic Auth tokens to go through the query string",
+        "# Maintenance",
+        "[Improved] Changes to Placid UI for better integration to Craft 2.* and better usability",
+        "[Improved] Refactored some of Placids code base",
+    ]
+  },
   {
     "version": "1.7.114",
     "downloadUrl": "https://github.com/alecritson/Placid/archive/master.zip",

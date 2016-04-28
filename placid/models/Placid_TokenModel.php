@@ -12,6 +12,7 @@ class Placid_TokenModel extends BaseModel
         return array(
             'id'    => AttributeType::Number,
             'name' => array(AttributeType::String, 'required' => true),
+            'forceQuery' => AttributeType::Bool,
             'encoded_token' => AttributeType::String
         );
     }

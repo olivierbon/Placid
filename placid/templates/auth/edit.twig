@@ -21,6 +21,7 @@
     {% if token %}
       <input type="hidden" name="tokenId" value="{{ token.id }}" />
     {% endif %}
+  
 
     {{ forms.textField({
       label: 'Name'|t,
@@ -30,6 +31,14 @@
       value: token ? token.name : null,
       errors: token ? token.errors('name') : null
     }) }}
+
+    {{ forms.lightSwitchField({
+      label: 'Force query string',
+      instructions: "Check if you explicitly don't want this token to go through the request headers",
+      name: 'forceQuery',
+      on: token ? token.forceQuery : null,
+      errors: token ? token.errors('forceQuery') : null
+    })}}
 
     {{ forms.textField({
       label: 'Token'|t,

@@ -19,6 +19,7 @@
     <thead>
       <tr>
         <th scope="col">{{ "Name"|t }}</th>
+        <th scope="col">{{ "Force Query"|t }}</th>
         <th scope="col">{{ "Access token"|t }}</th>
         <th></th>
       </tr>
@@ -27,6 +28,7 @@
       {% for token in tokens %}
       <tr data-id="{{ token.id }}" data-name="{{ token.name }}">
         <td><a href="{{ url("placid/auth/" ~ token.id) }}">{{ token.name }}</a></td>
+        <td><span class="status {{ token.forceQuery ? 'live' : 'disabled' }}"></span> </td>
         <td>
           {% if user.admin %}
             {{ token.encoded_token }}

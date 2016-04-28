@@ -13,6 +13,7 @@ class Placid_TokenRecord extends BaseRecord
     {
         return array(
             'name' => array(AttributeType::String, 'required' => true),
+            'forceQuery' => array(AttributeType::Bool, 'required' => true, 'default' => false),
 			      'encoded_token' => array(AttributeType::Mixed, 'required' => true)
         );
     }

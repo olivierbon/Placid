@@ -12,6 +12,10 @@ class PlacidPlugin extends BasePlugin
   {
     return '1.7.115';
   }
+  public function getSchemaVersion()
+  {
+      return '1.1.0';
+  }
   function getDeveloper()
   {
     return 'Alec Ritson';

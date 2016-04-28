@@ -71,7 +71,7 @@ class PlacidController extends BaseController
 		// Get the request by its ID or not
 		if(array_key_exists('tokenId', $variables))
 		{
-			$variables['token'] = craft()->placid_token->getById($variables['tokenId']);
+			$variables['token'] = craft()->placid_token->findTokenById($variables['tokenId']);
 			if(!$variables['token'])
 			{
 				throw new HttpException(404);

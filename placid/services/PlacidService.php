@@ -28,11 +28,11 @@ class PlacidService extends BaseApplicationComponent
 	 * Gets all the records for the given record type
 	 * @return Array An array of Model objects
 	 */
-	public function getAll()
+	public function getAll($record)
 	{
 		$args = array('order' => 't.id');
-    	$records = $this->record->findAll($args);
-    	return $this->model->populateModels($records, 'id');
+    	$records = $record->findAll($args);
+    	return $record->model()->populateModels($records, 'id');
 	}
 
 	/**

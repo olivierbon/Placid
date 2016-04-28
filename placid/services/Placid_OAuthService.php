@@ -14,7 +14,7 @@
  */
 namespace Craft;
 
-class Placid_OAuthService extends PlacidService
+class Placid_OAuthService extends BaseApplicationComponent
 {
 	/**
 	 * The token model
@@ -22,12 +22,6 @@ class Placid_OAuthService extends PlacidService
 	 */
 	var $token;
 
-	public function __construct()
-	{
-		parent::__construct();
-		$this->model = new Placid_OAuthModel;
-		$this->record = new Placid_OAuthRecord;
-	}
 
 	/**
 	 * Returns a model representing the token we want to get from
@@ -52,11 +46,17 @@ class Placid_OAuthService extends PlacidService
 		  );
 		if($record)
 		{
-		  return $this->model->populateModel($record);
+		  return Placid_OAuthModel::populateModel($record);
 		}
 		return null;
 	}
 
+	public function findAllProviders()
+	{
+		$args = array('order' => 't.id');
+    	$records = Placid_OAuthRecord::model()->findAll($args);
+    	return Placid_OAuthModel::populateModels($records, 'id');
+	}
 	/**
 	 * Saves a Placid_OAuthModel and also the Oauth_TokenModel which is handy
 	 * @param  String           $provider Name of the provider we want to save
@@ -72,7 +72,7 @@ class Placid_OAuthService extends PlacidService
 		if($tokenModel)
 		{
 			$existingToken = craft()->oauth->getTokenById($tokenModel->tokenId);
-			$record = $this->record->findByPk($tokenModel->id);
+			$record = Placid_OAuthRecord::findByPk($tokenModel->id);
 		}
 		else
 		{
@@ -139,7 +139,7 @@ class Placid_OAuthService extends PlacidService
 
 		if($tokenModel)
 		{
-			$this->record->deleteByPk($tokenModel->id);
+			Placid_OAuthRecord::model()->deleteByPk($tokenModel->id);
 		}
 		return true;
 	}

@@ -13,7 +13,7 @@ class PlacidController extends BaseController
 	 */
 	public function actionPlacidIndex()
 	{
-		$variables['requests'] = craft()->placid_requests->getAll();
+		$variables['requests'] = craft()->placid_requests->findAllRequests();
 		$this->renderTemplate('placid/requests/index', $variables);
 	}
 
@@ -34,7 +34,7 @@ class PlacidController extends BaseController
 		// Get the request by its ID or not
 		if(array_key_exists('requestId', $variables))
 		{
-			$variables['request'] = craft()->placid_requests->getById($variables['requestId']);
+			$variables['request'] = craft()->placid_requests->getRequestById($variables['requestId']);
 			if(!$variables['request'])
 			{
 				throw new HttpException(404);
@@ -57,7 +57,7 @@ class PlacidController extends BaseController
 	 */
 	public function actionAuthIndex(array $variables = array())
 	{
-		$variables['tokens'] = craft()->placid_token->getAll();
+		$variables['tokens'] = craft()->placid_token->getAllTokens();
 		$this->renderTemplate('placid/auth/index', $variables);
 	}
 
@@ -112,9 +112,7 @@ class PlacidController extends BaseController
 	 */
 	private function _getProviders()
 	{
-		$providers = craft()->placid_oAuth->getAll();
-
-
+		$providers = craft()->placid_oAuth->findAllProviders();
 		if($providers)
 		{
 			$values = array();
@@ -124,8 +122,7 @@ class PlacidController extends BaseController
 	        }
 	        return $values;
 		}
-
-  //       return null;
+        return null;
 	}
 
 	/**

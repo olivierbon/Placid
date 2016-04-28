@@ -16,7 +16,7 @@ class Placid_TokenController extends BaseController
     // -----------------------------------------------------------------------------
 
     if($id = craft()->request->getPost('tokenId')) {
-      $model = craft()->placid_token->getById($id);
+      $model = craft()->placid_token->findTokenById($id);
     } else {
       $model = craft()->placid_token->newToken($id);
     }
@@ -56,15 +56,8 @@ class Placid_TokenController extends BaseController
     $this->requireAjaxRequest();
 
     $id = craft()->request->getRequiredPost('id');
-    craft()->placid_token->deleteRecordById($id);
+    craft()->placid_token->deleteTokenById($id);
 
     $this->returnJson(array('success' => true));
-  }
-
-  public function poop($nugget)
-  {
-    echo "<pre>";
-    print_r($nugget);
-    die();
   }
 }

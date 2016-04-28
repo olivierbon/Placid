@@ -19,7 +19,7 @@ class Placid_RequestsController extends BaseController
       // -----------------------------------------------------------------------------
 
       if($id = craft()->request->getPost('requestId')) {
-        $model = craft()->placid_requests->getById($id);
+        $model = craft()->placid_requests->getRequestById($id);
       } else {
         $model = new Placid_RequestsModel();
       }

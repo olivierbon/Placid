@@ -7,11 +7,14 @@ class Placid_ResponseVariable
 	public $data;
 	protected $response;
 
-    public function __construct(\Guzzle\Http\Message\Response $response)
+    public function __construct($response)
     {
-    	$this->statusCode = $response->getStatusCode();
-    	$this->response = $response;
-    	$this->data = $this->_getDataArray();
+        if($response)
+        {
+            $this->statusCode = $response->getStatusCode();
+            $this->response = $response;
+            $this->data = $this->_getDataArray();
+        }
     }
 
     public function status()
@@ -29,26 +32,6 @@ class Placid_ResponseVariable
 
     private function _getDataArray()
     {
-
-    	$responseBody = $this->response->getBody();
-
-    	$contentType = preg_match('/.+?(?=;)/', $responseBody->getContentType(), $matches);
-
-	    $contentType = implode($matches, '');
-	    
-	    try {   
-	      if($contentType == 'text/xml')
-	      {
-	        $output = $this->response->xml();
-	      }
-	      else
-	      {
-	        $output = $this->response->json();
-	      }
-	    } catch (\Guzzle\Common\Exception\RuntimeException $e) {
-	      PlacidPlugin::log($e->getMessage(), LogLevel::Error);
-	      $output = null;
-	    }
-	    return $output;
+	    return craft()->placid_requests->getDataFromResponse($this->response);
     }
 }

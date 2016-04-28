@@ -16,7 +16,7 @@ namespace Craft;
 
 use Guzzle\Http\Client;
 
-class Placid_TokenService extends PlacidService
+class Placid_TokenService extends BaseApplicationComponent
 {
 
   /**
@@ -30,12 +30,6 @@ class Placid_TokenService extends PlacidService
    * @var
    */
   private $token;
-
-  public function __construct()
-  {
-    $this->record = new Placid_TokenRecord;
-    $this->model = new Placid_TokenModel();
-  }
 
   /**
   * Create a new model object of a token
@@ -64,7 +58,7 @@ class Placid_TokenService extends PlacidService
   {
     if($id = $model->getAttribute('id'))
     {
-      $record = $this->record->findByPk($id);
+      $record = Placid_TokenRecord::model()->findByPk($id);
     }
     else
     {
@@ -93,12 +87,7 @@ class Placid_TokenService extends PlacidService
   */
   public function getAllTokens()
   {
-    $records = $this->record->findAll(array('order' => 't.id'));
-
-    foreach($records as $record)
-    {
-        $record->setAttribute('encoded_token', craft()->security->validateData($record->getAttribute('encoded_token')));
-    }
+    $records = Placid_TokenRecord::model()->findAll(array('order' => 't.id'));
     return Placid_TokenModel::populateModels($records, 'id');
   }
 
@@ -115,6 +104,7 @@ class Placid_TokenService extends PlacidService
    {
       return Placid_TokenModel::populateModel($record);
    }
+   return null;
   }
 
   /**
@@ -123,9 +113,9 @@ class Placid_TokenService extends PlacidService
    * @param  int $id
    * @return int The number of rows affected
    */
-  public function deleteRecordById($id)
+  public function deleteTokenById($id)
   {
-      return $this->record->deleteByPk($id);
+      return Placid_TokenRecord::model()->deleteByPk($id);
   }
 
 }

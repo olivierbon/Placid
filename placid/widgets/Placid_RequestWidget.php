@@ -69,7 +69,7 @@ class Placid_RequestWidget extends BaseWidget
         $pluginSettings = craft()->plugins->getPlugin('placid')->getSettings();
 
         // Get placid requests and send them to the widget settings
-        $requests = craft()->placid_requests->getAll();
+        $requests = craft()->placid_requests->findAllRequests();
 
         $requestsArray = array('' => 'No request selected');
 

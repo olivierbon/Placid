@@ -404,7 +404,7 @@ class Placid_RequestsService extends BaseApplicationComponent
       
       $tokenModel = craft()->placid_token->findTokenById($tokenId);
 
-      if(!$token->forceQuery)
+      if(!$tokenModel->forceQuery)
       {
         $request->addHeader('Authorization', 'Bearer ' . $tokenModel->encoded_token);
       }

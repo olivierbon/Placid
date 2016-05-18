@@ -75,9 +75,16 @@ class Placid_RequestsService extends BaseApplicationComponent
       $config
     );
 
-    // Handle any changes to api gracefully
-    $this->_swapDeprecatedConfig('path', 'segments');
+    // if(isset($config['segments']))
+    
+    if(isset($this->config['segments']))
+    {
+      $model->url = $this->parseSegments($model->url, $this->config['segments']);
+    }
+
     $this->_swapDeprecatedConfig('query', 'params');
+
+
 
     // Create a new guzzle client
     $client = new Client();
@@ -524,5 +531,15 @@ class Placid_RequestsService extends BaseApplicationComponent
   private function _getCacheId()
   {
     return base64_encode(urlencode($this->cacheId));
+  }
+
+  private function parseSegments($str, $segments)
+  {
+    foreach ($segments as $key => $value)
+    {
+      $str = str_replace('{'.$key.'}', $value, $str);
+    }
+
+    return $str;
   }
 }

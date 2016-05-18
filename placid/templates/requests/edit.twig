@@ -2,6 +2,8 @@
 
 {% import "_includes/forms" as forms %}
 
+{% set docsUrl = 'https://github.com/alecritson/Placid/wiki/Create-your-first-request' %}
+
 {% set title = request ? request.name : "New Request"|t %}
 {% set fullPageForm = true %}
 {% set saveShortcutRedirect = "/admin/placid/" ~ (request ? 'requests/' ~ request.id)  %}

@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.8.121",
+    "downloadUrl": "https://github.com/alecritson/Placid/archive/1.8.121.zip",
+    "date": "2016-05-18T00:00:00+00:00",
+    "notes": [
+        "# Additions",
+        "[Added] You can now add [dynamic segments](https://github.com/alecritson/Placid/wiki/Making-requests) to your request urls",
+    ]
+  },
+  {
     "version": "1.7.120",
     "downloadUrl": "https://github.com/alecritson/Placid/archive/master.zip",
     "date": "2016-05-18T00:00:00+00:00",

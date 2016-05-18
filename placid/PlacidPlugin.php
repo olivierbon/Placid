@@ -26,7 +26,7 @@ class PlacidPlugin extends BasePlugin
   }
   public function getReleaseFeedUrl()
   {
-      return 'https://raw.githubusercontent.com/alecritson/Placid/master/manifest.json';
+      return 'https://raw.githubusercontent.com/alecritson/Placid/master/placid/manifest.json#';
   }
   function getDeveloperUrl()
   {

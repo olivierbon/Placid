@@ -84,8 +84,6 @@ class Placid_RequestsService extends BaseApplicationComponent
 
     $this->_swapDeprecatedConfig('query', 'params');
 
-
-
     // Create a new guzzle client
     $client = new Client();
 
@@ -330,9 +328,9 @@ class Placid_RequestsService extends BaseApplicationComponent
       $this->config['url'] = $recordUrl;
     }
 
-    $this->cacheId = $this->config['url'];
-
     $request = $client->createRequest($this->config['method'], $this->config['url']);
+
+    $this->cacheId = $request->getUrl();
 
     if(array_key_exists('body', $this->config))
     {

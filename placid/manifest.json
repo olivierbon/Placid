@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.8.122",
+    "downloadUrl": "https://github.com/alecritson/Placid/archive/1.8.121.zip",
+    "date": "2016-06-16T00:00:00+00:00",
+    "notes": [
+        "# Fixes",
+        "[Fixed] Fixed error when cache ID gets set, resulting in duplicate ID's",
+    ]
+  },
+  {
     "version": "1.8.121",
     "downloadUrl": "https://github.com/alecritson/Placid/archive/1.8.121.zip",
     "date": "2016-05-18T00:00:00+00:00",

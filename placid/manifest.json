@@ -14,7 +14,7 @@
     "date": "2016-05-18T00:00:00+00:00",
     "notes": [
         "# Additions",
-        "[Added] You can now add [dynamic segments](https://github.com/alecritson/Placid/wiki/Making-requests) to your request urls",
+        "[Added] You can now add [dynamic segments](https://github.com/alecritson/Placid/wiki/Making-requests) to your request urls"
     ]
   },
   {
@@ -23,7 +23,7 @@
     "date": "2016-05-18T00:00:00+00:00",
     "notes": [
         "# Fixes",
-        "[Fixed] Correct misnamed $token variable in Placid_RequestService (thanks Jonathan)",
+        "[Fixed] Correct misnamed $token variable in Placid_RequestService (thanks Jonathan)"
     ]
   },
   {
@@ -35,7 +35,7 @@
         "[Added] You can now force Basic Auth tokens to go through the query string",
         "# Maintenance",
         "[Improved] Changes to Placid UI for better integration to Craft 2.* and better usability",
-        "[Improved] Refactored some of Placids code base",
+        "[Improved] Refactored some of Placids code base"
     ]
   },
   {
@@ -45,7 +45,7 @@
     "notes": [
         "# Bug fixes",
         "[Fixed] Response for custom widgets was empty, this is now updated inline with previous update. You need to reference the response as `response.data` in your templates",
-        "[Fixed] Fixed issue with retrieving access token",
+        "[Fixed] Fixed issue with retrieving access token"
     ]
   },
   {
@@ -55,7 +55,7 @@
     "notes": [
         "# Changes and additions",
         "[Added] Responses now return an instance of `Placid_ResponseVariable`",
-        "[Changes] Changes for Craft 2.5",
+        "[Changes] Changes for Craft 2.5"
     ]
   },
   {

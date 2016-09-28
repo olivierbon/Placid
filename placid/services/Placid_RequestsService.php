@@ -76,7 +76,7 @@ class Placid_RequestsService extends BaseApplicationComponent
     );
 
     // if(isset($config['segments']))
-    
+
     if(isset($this->config['segments']))
     {
       $model->url = $this->parseSegments($model->url, $this->config['segments']);
@@ -134,12 +134,12 @@ class Placid_RequestsService extends BaseApplicationComponent
   {
     $responseBody = $response->getBody();
 
-    $contentType = preg_match('/.+?(?=;)/', $responseBody->getContentType(), $matches);
+    $contentType = preg_match('/.+?(?=;)/', $response->getContentType(), $matches);
 
     $contentType = implode($matches, '');
-    
-    try {   
-      if($contentType == 'text/xml')
+
+    try {
+      if($contentType == 'text/xml' || $contentType == 'application/xml')
       {
         $output = $response->xml();
       }
@@ -406,7 +406,7 @@ class Placid_RequestsService extends BaseApplicationComponent
     // Has the request got an access token we need to attach?
     if($tokenId = $record->getAttribute('tokenId'))
     {
-      
+
       $tokenModel = craft()->placid_token->findTokenById($tokenId);
 
       if(!$tokenModel->forceQuery)
@@ -420,7 +420,7 @@ class Placid_RequestsService extends BaseApplicationComponent
 
     }
 
-    
+
     return $request;
   }
 
@@ -448,10 +448,10 @@ class Placid_RequestsService extends BaseApplicationComponent
         $response = $e->getResponse();
         $message['statusCode'] = $response->getStatusCode();
       }
-      
+
       return $response;
     }
-    
+
     if($this->config['cache'])
     {
       craft()->placid_cache->set($this->_getCacheId(), $response, $this->config['duration']);

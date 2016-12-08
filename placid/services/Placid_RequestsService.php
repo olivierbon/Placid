@@ -134,12 +134,12 @@ class Placid_RequestsService extends BaseApplicationComponent
   {
     $responseBody = $response->getBody();
 
-    $contentType = preg_match('/.+?(?=;)/', $responseBody->getContentType(), $matches);
+    $contentType = preg_match('/.+?(?=;)/', $response->getHeader('content-type'), $matches);
 
     $contentType = implode($matches, '');
     
     try {   
-      if($contentType == 'text/xml')
+      if($contentType == 'text/xml' || $contentType == 'application/xml')
       {
         $output = $response->xml();
       }
